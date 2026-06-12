@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String         @map("password_hash")
+  displayName   String         @map("display_name")
+  language      String         @default("fr")
+  avatarUrl     String?        @map("avatar_url")
+  role          String         @default("subscriber")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  userTrainings UserTraining[]
+
+  @@map("users")
+}
+
+model Training {
+  id                    Int      @id @default(autoincrement())
+  title                 String
+  language              String
+  descriptionHtml       String   @map("description_html") @db.Text
+  code                  String   @unique
+  pageUrl               String?  @map("page_url")
+  stripeProductId       String?  @map("stripe_product_id")
+  stripePriceId         String?  @map("stripe_price_id")
+  confirmationEmailHtml String?  @map("confirmation_email_html") @db.Text
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@map("trainings")
+}
+
+model UserTraining {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  trainingCode    String   @map("training_code")
+  stripeSessionId String?  @map("stripe_session_id")
+  purchasedAt     DateTime @default(now()) @map("purchased_at")
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@map("user_trainings")
+}
+
+model EmailTemplate {
+  id        Int      @id @default(autoincrement())
+  key       String
+  language  String
+  subject   String
+  html      String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([key, language])
+  @@map("email_templates")
+}
