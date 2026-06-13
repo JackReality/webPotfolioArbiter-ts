@@ -17,17 +17,17 @@ export async function POST(req: NextRequest) {
   const user = await UserService.getByEmail(email);
   if (!user) return NextResponse.redirect(errorUrl, 303);
 
-  const ok = await bcrypt.compare(password, user.password_hash);
+  const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return NextResponse.redirect(errorUrl, 303);
 
-  const trainings = await UserTrainingService.getByUser(user.id);
-  const trainingCodes = trainings.map((t) => t.training_code);
+  const trainings = await UserTrainingService.getByUser(Number(user.id));
+  const trainingCodes = trainings.map((t) => t.trainingCode);
 
   const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
   const session = await getSessionFromRequest(req, res);
-  session.id = user.id;
+  session.id = Number(user.id);
   session.email = user.email;
-  session.displayName = user.display_name;
+  session.displayName = user.displayName;
   session.role = user.role;
   session.language = user.language;
   session.trainings = trainingCodes;

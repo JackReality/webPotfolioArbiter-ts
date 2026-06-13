@@ -13,11 +13,11 @@ export async function GET(req: NextRequest) {
   const user = await UserService.getById(session.id);
   if (!user) return res;
 
-  const trainings = await UserTrainingService.getByUser(user.id);
-  const trainingCodes = trainings.map((t) => t.training_code);
+  const trainings = await UserTrainingService.getByUser(Number(user.id));
+  const trainingCodes = trainings.map((t) => t.trainingCode);
 
   session.email = user.email;
-  session.displayName = user.display_name;
+  session.displayName = user.displayName;
   session.role = user.role;
   session.language = user.language;
   session.trainings = trainingCodes;

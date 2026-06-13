@@ -17,7 +17,7 @@
     "subtitle": "La Google Sheet qui vous accompagne dans la gestion de votre portefeuille d'investissement",
     "description": "Une feuille Google Sheets puissante et intuitive pour suivre, analyser et optimiser vos investissements en bourse.",
     "ctaCopy": "Obtenir la feuille",
-    "ctaLearn": "Découvrir la formation"
+    "ctaLearn": "Télécharger la feuille Google Sheet"
   },
   "moreThanSheet": {
     "title": "Bien plus qu'un tableur !",
@@ -257,22 +257,5 @@
         { "title": "5. Contact", "content": "Email : {{email}}" }
       ]
     }
-  },
-  "errors": {
-    "ERR_EMAIL_TAKEN": "Cet email est déjà utilisé.",
-    "ERR_USER_NOT_FOUND": "Utilisateur introuvable.",
-    "ERR_ADMIN_PROTECTED": "Impossible de modifier un administrateur.",
-    "ERR_PASSWORD_TOO_SHORT": "Le mot de passe doit faire au moins 6 caractères.",
-    "ERR_PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas.",
-    "ERR_FILL_ALL": "Veuillez remplir tous les champs.",
-    "ERR_INVALID_EMAIL": "Adresse email invalide.",
-    "ERR_TRAINING_NOT_FOUND": "Formation introuvable.",
-    "ERR_CODE_NOT_FOUND": "Code non trouvé. Recommencez.",
-    "ERR_CODE_EXPIRED": "Code expiré. Demandez un nouveau code.",
-    "ERR_CODE_MAX_ATTEMPTS": "Trop de tentatives. Recommencez.",
-    "ERR_CODE_INVALID": "Code incorrect.",
-    "ERR_STRIPE_NOT_CONFIGURED": "Le paiement n'est pas encore configuré pour cette formation.",
-    "ERR_CONTACT_TOO_FAST": "Veuillez attendre quelques secondes avant de renvoyer un message.",
-    "ERR_SYSTEM": "Une erreur système est survenue. Veuillez réessayer."
   }
 }

@@ -17,7 +17,7 @@
     "subtitle": "The Google Sheet that helps you manage your investment portfolio",
     "description": "A powerful and intuitive Google Sheets spreadsheet to track, analyze and optimize your stock investments.",
     "ctaCopy": "Get the sheet",
-    "ctaLearn": "Discover the course"
+    "ctaLearn": "Download the Google Sheet"
   },
   "moreThanSheet": {
     "title": "Much more than a spreadsheet!",
@@ -257,22 +257,5 @@
         { "title": "5. Contact", "content": "Email: {{email}}" }
       ]
     }
-  },
-  "errors": {
-    "ERR_EMAIL_TAKEN": "This email is already in use.",
-    "ERR_USER_NOT_FOUND": "User not found.",
-    "ERR_ADMIN_PROTECTED": "Cannot modify an administrator.",
-    "ERR_PASSWORD_TOO_SHORT": "Password must be at least 6 characters.",
-    "ERR_PASSWORD_MISMATCH": "Passwords do not match.",
-    "ERR_FILL_ALL": "Please fill in all fields.",
-    "ERR_INVALID_EMAIL": "Invalid email address.",
-    "ERR_TRAINING_NOT_FOUND": "Training not found.",
-    "ERR_CODE_NOT_FOUND": "Code not found. Please try again.",
-    "ERR_CODE_EXPIRED": "Code has expired. Request a new one.",
-    "ERR_CODE_MAX_ATTEMPTS": "Too many attempts. Please try again.",
-    "ERR_CODE_INVALID": "Incorrect code.",
-    "ERR_STRIPE_NOT_CONFIGURED": "Payment is not yet configured for this training.",
-    "ERR_CONTACT_TOO_FAST": "Please wait a few seconds before sending another message.",
-    "ERR_SYSTEM": "A system error occurred. Please try again."
   }
 }

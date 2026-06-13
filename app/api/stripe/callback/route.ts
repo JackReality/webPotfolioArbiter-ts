@@ -42,16 +42,16 @@ export async function GET(req: NextRequest) {
     }
 
     const allTrainings = await UserTrainingService.getByUser(userId);
-    const trainingCodes = allTrainings.map((t) => t.training_code);
+    const trainingCodes = allTrainings.map((t) => t.trainingCode);
 
-    const successUrl = new URL(`/stripe-success?code=${encodeURIComponent(trainingCode)}`, req.url);
+    const successUrl = new URL(`/subscriber/stripe-success?code=${encodeURIComponent(trainingCode)}`, req.url);
     const res = NextResponse.redirect(successUrl, 303);
 
     // Mettre à jour le cookie de session
     const session = await getSessionFromRequest(req, res);
-    session.id = user.id;
+    session.id = Number(user.id);
     session.email = user.email;
-    session.displayName = user.display_name;
+    session.displayName = user.displayName;
     session.role = ["admin", "moderator"].includes(user.role) ? user.role : "client";
     session.language = user.language;
     session.trainings = trainingCodes;
@@ -59,9 +59,9 @@ export async function GET(req: NextRequest) {
 
     // Email de confirmation si le template est renseigné sur la formation
     const training = await TrainingService.getByCode(trainingCode);
-    if (training?.confirmation_email_html) {
-      const html = training.confirmation_email_html
-        .replace(/\{\{\s*\.?(?:DisplayName|Name)\s*\}\}/g, user.display_name)
+    if (training?.confirmationEmailHtml) {
+      const html = training.confirmationEmailHtml
+        .replace(/\{\{\s*\.?(?:DisplayName|Name)\s*\}\}/g, user.displayName)
         .replace(/\{\{\s*\.?Title\s*\}\}/g, training.title);
       try {
         await sendEmail(user.email, `Confirmation d'achat — ${training.title}`, html);

@@ -31,7 +31,7 @@ export default async function CatalogPage() {
               </div>
               <div
                 className="prose prose-invert prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: training.description_html }}
+                dangerouslySetInnerHTML={{ __html: training.descriptionHtml }}
               />
               <div className="my-4">
                 <CatalogBuyButton trainingId={training.id} lang={lang} />

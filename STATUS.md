@@ -3,9 +3,77 @@
 Réécriture du projet Blazor C# (`../webPortfolio-cs`) en Next.js 16 + TypeScript.
 Avancement : chaque tâche est marquée `[ ]` (à faire) ou `[x]` (terminée).
 
+# Règles
+
+Règle : 7 sections maximum. Section 1 = À faire. Sections 2-7 (Archive) = Fait le YYYY-MM-DD (la plus ancienne est supprimée quand une nouvelle est ajoutée).
+La demande utilisateur: "Archive" déplace toutes les tâches faites du jour dans les chapitres d'archive
+Hirérachie: Projet > Tâches > étapes. Chaque tâches est analysée, puis on liste les étapes
+Les tâches sont regroupé dans des projets ou le projet Divers si c'est une simple tâche
+
 ---
 
-## PHASE 1 — Infrastructure
+## À FAIRE
+
+### PHASE 8 — Pages admin
+
+- [ ] `/admin/dashboard` — Dashboard : 3 boutons vers users / trainings / email-templates
+- [ ] `/admin/users` — Gestion utilisateurs : tableau (email, nom, rôle, langue, date), dialog changement de rôle, suppression avec confirmation, admins protégés
+- [ ] `/admin/trainings` — Gestion formations : tableau + formulaire ajout/édition (titre, code, langue, descriptionHtml, pageUrl, stripeProductId, stripePriceId, confirmationEmailHtml)
+- [ ] `/admin/email-templates` — Templates emails : onglets par type (confirm_signup / recovery / welcome), sous-onglets FR/EN/ES, édition sujet + corps HTML
+
+---
+
+### PHASE 9 — Pages formation
+
+- [ ] `/training_portfolio` — Page formation Portfolio : vérifier training="PORTFOLIO" dans le cookie, afficher titre + descriptionHtml
+
+---
+
+### Divers
+
+- [ ] **Agrandir texte des blocs accueil** — Comparer avec image `jack-import/Comparer taille et épaisseur.png` (image non trouvée, demander à l'utilisateur de la fournir dans `jack-import/`)
+- [ ] **Legal — email anti-bot** — Dans `/legal`, onglet "Mentions légales", afficher l'email de contact avec un bouton "Afficher l'email" (client component) au lieu d'afficher le texte brut — protège contre les bots
+- [ ] **Contact** — Vérifier que le formulaire envoie bien avec l'email du visiteur en `From` (reply-to) pour que le destinataire puisse répondre directement
+- [ ] **Hydratation Dark Reader** — L'erreur de console vient de l'extension Dark Reader dans le navigateur, pas du code. Ignorer en prod, ne pas traiter.
+
+---
+
+## Fait le 2026-06-13
+
+### Réorganisation arborescence (CLAUDE.md)
+
+- [x] Déplacer pages subscriber dans `app/subscriber/` : myspace, download, stripe-success, profile (+ ProfileForms), reset-password
+- [x] Simplifier `middleware.ts` → `proxy.ts` (Next.js 16) : supprimer entrées individuelles `/profile`, `/myspace` etc., tout couvert par `/subscriber/**`
+- [x] Mettre à jour tous les liens internes vers les nouvelles URLs `/subscriber/*`
+- [x] Corriger URL succès Stripe : `/stripe-success` → `/subscriber/stripe-success`
+- [x] `next.config.ts` : `allowedDevOrigins: ["127.0.0.1"]`
+- [x] `layout.tsx` : `suppressHydrationWarning` sur `<html>`
+
+### Connexion base de données
+
+- [x] Corriger port MariaDB : 3306 → 13306
+- [x] Corriger credentials : `root:@` → `portfolio:123@portfolio_arbiter`
+- [x] Régénérer client Prisma après `db pull` (schéma mis à jour : IDs BigInt)
+- [x] Corriger `Number(user.id)` dans login, refresh-claims, stripe callback (bigint → number)
+
+### Navigation et layout
+
+- [x] Footer extrait dans `components/Footer.tsx` et ajouté dans `app/layout.tsx` (présent sur toutes les pages)
+- [x] Menu : ordre Accueil / Télécharger / Formation / Contact, Télécharger toujours visible
+- [x] Bouton accueil : "Découvrir la formation" → "Télécharger la feuille Google Sheet" (FR/EN/ES)
+- [x] Texte blocs accueil : `text-base font-medium` → `text-lg font-semibold`
+
+### Corrections bugs
+
+- [x] `/legal` — Onglets non fonctionnels : extrait `LegalTabs.tsx` client component avec useState
+- [x] Liens langue : `<Link>` → `<a>` dans NavLinks et LanguageSwitcher (forçe rechargement complet)
+- [x] `proxy.ts` : renommage `middleware` → `proxy` (convention Next.js 16)
+
+---
+
+## Fait le 2026-06-12
+
+### PHASE 1 — Infrastructure
 
 - [x] Initialiser le projet Next.js 16 avec TypeScript (`npx create-next-app`)
 - [x] Installer les dépendances : `bcrypt`, `nodemailer`, `stripe`, `iron-session`, `prisma@5.22.0`
@@ -14,12 +82,10 @@ Avancement : chaque tâche est marquée `[ ]` (à faire) ou `[x]` (terminée).
 - [x] Créer `lib/AppError.ts` — classe centrale d'erreurs (code + numéro)
 - [x] Créer `lib/auth.ts` — lecture/écriture du cookie HTTP-only (email, nom, role, langue, trainings[])
 - [x] Créer `lib/i18n.ts` — chargement des fichiers JSON FR/EN/ES (`jack-import/*.json`)
-- [x] Créer `middleware.ts` — vérification rôle et trainings[] par route
-- [x] Créer `.env.local` — variables DB_*, SMTP_*, STRIPE_SECRET_KEY, CONTACT_EMAIL, MAIL_FROM
+- [x] Créer `proxy.ts` — vérification rôle et trainings[] par route
+- [x] Créer `.env` — variables DB_*, SMTP_*, STRIPE_SECRET_KEY, CONTACT_EMAIL, MAIL_FROM
 
----
-
-## PHASE 2 — Types TypeScript
+### PHASE 2 — Types TypeScript
 
 - [x] `types/User.ts` — re-exporte `User` depuis `@prisma/client`
 - [x] `types/Training.ts` — re-exporte `Training` depuis `@prisma/client`
@@ -27,97 +93,52 @@ Avancement : chaque tâche est marquée `[ ]` (à faire) ou `[x]` (terminée).
 - [x] `types/EmailTemplate.ts` — re-exporte `EmailTemplate` depuis `@prisma/client`
 - [x] `prisma/schema.prisma` — modèles User, Training, UserTraining, EmailTemplate avec `@map`/`@@map`
 
----
+### PHASE 3 — Services
 
-## PHASE 3 — Services
+- [x] `services/UserService.ts`
+- [x] `services/TrainingService.ts`
+- [x] `services/UserTrainingService.ts`
+- [x] `services/EmailTemplateService.ts`
+- [x] `services/EmailService.ts`
+- [x] `services/CodeService.ts`
+- [x] `services/StripeService.ts`
 
-- [x] `services/UserService.ts` — getById, getAll, getByEmail, emailExists, add (bcrypt), update, changePassword, changeEmail, changeRole, verifyPassword, remove
-- [x] `services/TrainingService.ts` — getById, getAll, getByLanguage, getByCode, getByCodes, add, update, remove
-- [x] `services/UserTrainingService.ts` — getById, getByUser, hasAccess, add, update, remove
-- [x] `services/EmailTemplateService.ts` — getById, getAll, get(key, language), update, save
-- [x] `services/EmailService.ts` — sendEmail via SMTP (nodemailer), support replyTo
-- [x] `services/CodeService.ts` — generateCode, checkCode — Map en mémoire, expiry 20 min, max 5 tentatives
-- [x] `services/StripeService.ts` — createCheckoutSession (training, userId, successUrl, cancelUrl)
+### PHASE 4 — API Routes
 
----
+- [x] `app/api/auth/login/route.ts`
+- [x] `app/api/auth/logout/route.ts`
+- [x] `app/api/auth/refresh-claims/route.ts`
+- [x] `app/api/language/set/route.ts`
+- [x] `app/api/stripe/callback/route.ts`
 
-## PHASE 4 — API Routes (Route Handlers Next.js)
+### PHASE 5 — Pages publiques
 
-- [x] `app/api/auth/login/route.ts` — POST : vérifier identifiants, poser cookie auth + cookie langue
-- [x] `app/api/auth/logout/route.ts` — GET/POST : supprimer le cookie auth, rediriger vers /
-- [x] `app/api/auth/refresh-claims/route.ts` — GET : relire l'utilisateur en base, réécrire le cookie (après mise à jour profil)
-- [x] `app/api/language/set/route.ts` — GET : mettre à jour le cookie de langue, rediriger
-- [x] `app/api/stripe/callback/route.ts` — GET `/stripe-ok` : valider session Stripe, créer user_training, passer role à "client", envoyer email confirmation, rediriger
+- [x] `/` — Home : 6 sections
+- [x] `/login` — Connexion
+- [x] `/register` — Inscription en 2 étapes
+- [x] `/forgot-password` — Mot de passe oublié en 2 étapes
+- [x] `/catalog` — Catalogue formations
+- [x] `/contact` — Formulaire de contact
+- [x] `/legal` — Mentions légales (3 onglets)
+- [x] `/access-denied`, `/stripe-error`, `/not-found`
 
----
+### PHASE 6 — Pages subscriber
 
-## PHASE 5 — Pages publiques
+- [x] `/subscriber/myspace` — Mon espace
+- [x] `/subscriber/download` — Télécharger ressources
+- [x] `/subscriber/stripe-success` — Confirmation achat
 
-- [x] `/` — Home : 6 sections (hero, ticker, position, stratégie, transactions, rendement, arbitrage) avec images de `wwwroot/images`
-- [x] `/login` — Connexion : formulaire email + mot de passe, POST vers `/api/auth/login`
-- [x] `/register` — Inscription en 2 étapes : (1) formulaire → envoi code email via template `confirm_signup` ; (2) saisie code → création compte + email `welcome`
-- [x] `/forgot-password` — Mot de passe oublié en 2 étapes : (1) email → envoi code via template `recovery` ; (2) code + nouveau mdp → mise à jour
-- [x] `/catalog` — Catalogue : liste formations filtrées par langue, bouton Acheter → Stripe checkout (si non connecté → /login)
-- [x] `/contact` — Formulaire de contact : honeypot, rate limit 5 s, envoi email SMTP avec replyTo
-- [x] `/legal` — Mentions légales : 3 onglets CGV / Confidentialité / Mentions (contenu depuis les traductions)
-- [x] `/access-denied` — Page accès refusé
-- [x] `/stripe-error` — Page erreur paiement Stripe
-- [x] `/not-found` — Page 404
+### PHASE 7 — Pages profil
 
----
-
-## PHASE 6 — Pages subscriber
-
-- [ ] `/myspace` — Mon espace : section ressources (lien Download) + liste formations achetées avec bouton Accéder
-- [ ] `/download` — Télécharger : lien Google Sheets (abonnés et clients)
-- [ ] `/stripe-success` — Confirmation achat : affiche titre de la formation, bouton vers la page de formation
-
----
-
-## PHASE 7 — Pages profil (connecté)
-
-- [ ] `/profile` — Profil : modifier nom affiché, langue (→ refresh cookie), changement email avec code OTP, lien vers reset-password, lien admin si role=admin
-- [ ] `/reset-password` — Réinitialiser mot de passe (connecté) : vérifier mot de passe actuel, saisir nouveau mot de passe
-
----
-
-## PHASE 8 — Pages admin
-
-- [ ] `/admin-dashboard` — Dashboard : 3 boutons vers users / trainings / email-templates
-- [ ] `/admin/users` — Gestion utilisateurs : tableau (email, nom, rôle, langue, date), dialog changement de rôle, suppression avec confirmation, admins protégés
-- [ ] `/admin/trainings` — Gestion formations : tableau + formulaire ajout/édition (titre, code, langue, descriptionHtml, pageUrl, stripeProductId, stripePriceId, confirmationEmailHtml)
-- [ ] `/admin/email-templates` — Templates emails : onglets par type (confirm_signup / recovery / welcome), sous-onglets FR/EN/ES, édition sujet + corps HTML
-
----
-
-## PHASE 9 — Pages formation
-
-- [ ] `/training/portfolio_home` — Page formation Portfolio : vérifier training="PORTFOLIO" dans le cookie, afficher titre + descriptionHtml
-
----
-
-## PHASE 10 — Layout et navigation
-
-- [ ] `components/Layout.tsx` — Layout principal (header, footer)
-- [ ] `components/NavMenu.tsx` — Navigation : liens selon rôle, sélecteur FR|EN|ES, déconnexion
-
----
-
-## PHASE 11 — Multilingue
-
-- [ ] Copier `jack-import/fr.json`, `en.json`, `es.json` vers `lib/locales/`
-- [ ] Fonction `t(key, lang)` dans `lib/i18n.ts` pour accéder aux clés imbriquées (ex: `auth.email`)
-- [ ] Langue lue depuis le cookie auth (connecté) ou cookie `langue` (visiteur)
-- [ ] Changement de langue via `/api/language/set` sans rechargement complet de la page
+- [x] `/subscriber/profile` — Profil utilisateur
+- [x] `/subscriber/reset-password` — Changer mot de passe
 
 ---
 
 ## Notes techniques
 
+- ORM : Prisma v5.22.0 — IDs sont BigInt en DB, convertir avec `Number()` avant session
 - Cookie auth HTTP-only signé : `{ id, email, displayName, role, language, trainings[] }`
-- Restriction des pages : uniquement dans `middleware.ts`, jamais dans les pages elles-mêmes
-- ORM : Prisma v5.22.0 — schéma dans `prisma/schema.prisma`, client singleton dans `lib/prisma.ts`
-- Codes OTP : Map en mémoire serveur, expiry 20 min, max 5 tentatives, supprimé après usage
-- Contact : honeypot (champ caché) + cooldown 5 s côté API route
-- Stripe callback : valider session, enregistrer achat, mettre à jour cookie role → "client" + trainings[]
-- Templates emails : variables `{{ DisplayName }}`, `{{ Code }}`, `{{ Title }}` remplacées par regex avant envoi
+- Restriction des pages : uniquement dans `proxy.ts`, jamais dans les pages elles-mêmes
+- DB : MariaDB 11.8, port 13306, user `portfolio`, base `portfolio_arbiter`
+- Next.js 16 : `middleware.ts` → `proxy.ts`, fonction `proxy` (pas `middleware`)

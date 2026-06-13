@@ -10,12 +10,12 @@ export async function createCheckoutSession(
   successUrl: string,
   cancelUrl: string
 ): Promise<string> {
-  if (!training.stripe_price_id) {
+  if (!training.stripePriceId) {
     throw new AppError("ERR_STRIPE_NOT_CONFIGURED", 2030);
   }
 
   const session = await stripe.checkout.sessions.create({
-    line_items: [{ price: training.stripe_price_id, quantity: 1 }],
+    line_items: [{ price: training.stripePriceId, quantity: 1 }],
     mode: "payment",
     success_url: successUrl,
     cancel_url: cancelUrl,

@@ -11,7 +11,7 @@ export interface SessionData {
   trainings: string[];
 }
 
-const sessionOptions = {
+export const sessionOptions = {
   cookieName: "session",
   password: process.env.SESSION_SECRET ?? "changeme-au-moins-32-caracteres-secret",
   cookieOptions: {
