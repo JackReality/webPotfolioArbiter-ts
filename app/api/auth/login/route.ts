@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionFromRequest } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import * as UserService from "@/services/UserService";
 import * as UserTrainingService from "@/services/UserTrainingService";
 import bcrypt from "bcrypt";
@@ -23,8 +23,7 @@ export async function POST(req: NextRequest) {
   const trainings = await UserTrainingService.getByUser(Number(user.id));
   const trainingCodes = trainings.map((t) => t.trainingCode);
 
-  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
-  const session = await getSessionFromRequest(req, res);
+  const session = await getSession();
   session.id = Number(user.id);
   session.email = user.email;
   session.displayName = user.displayName;
@@ -33,8 +32,7 @@ export async function POST(req: NextRequest) {
   session.trainings = trainingCodes;
   await session.save();
 
-  // Cookie de langue séparé pour les visiteurs non connectés
+  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
   res.cookies.set("language", user.language, { path: "/", maxAge: 60 * 60 * 24 * 365 });
-
   return res;
 }

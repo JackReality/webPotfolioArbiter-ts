@@ -20,7 +20,7 @@ export default async function LegalPage() {
       <h1 className="text-3xl font-bold mb-2">{legal.title}</h1>
       <p className="text-muted-foreground mb-8 text-sm">{legal.intro}</p>
       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <LegalTabs legal={legal as any} />
+      <LegalTabs legal={legal as any} lang={lang} />
     </div>
   );
 }

@@ -9,6 +9,7 @@
     "logout": "Log out",
     "profile": "My profile",
     "copySheet": "Copy sheet",
+    "mySpace": "My Space",
     "clientArea": "Client Area"
   },
   "hero": {
@@ -196,6 +197,30 @@
     "button": "Copy the Google Sheets file",
     "redirectNote": "You will be redirected to Google Sheets. The sheet will be copied to your personal Drive."
   },
+  "ERR_CODE_INVALID": "Incorrect code.",
+  "ERR_CODE_EXPIRED": "Code expired. Request a new one.",
+  "ERR_CODE_NOT_FOUND": "No active code. Request a new one.",
+  "ERR_CODE_MAX_ATTEMPTS": "Too many attempts. Request a new code.",
+  "ERR_PASSWORD_INVALID": "Current password is incorrect.",
+  "ERR_PASSWORD_TOO_SHORT": "Password must be at least 8 characters.",
+  "ERR_EMAIL_SEND": "Unable to send the email. Check your address or try again.",
+  "ERR_UNAUTHORIZED": "You must be logged in.",
+  "ERR_USER_NOT_FOUND": "User not found.",
+  "ERR_FIELDS_REQUIRED": "All fields are required.",
+  "ERR_PASSWORD_MISMATCH": "Passwords do not match.",
+  "resetPassword": {
+    "title": "Change password",
+    "success": "Password changed successfully.",
+    "backToProfile": "Back to profile",
+    "codeInfo": "A verification code will be sent to your email address.",
+    "codeSentInfo": "A code has been sent to your email address.",
+    "sendCode": "Get a code by email",
+    "sending": "Sending…",
+    "codeLabel": "Code received by email",
+    "confirm": "Confirm",
+    "verifying": "Verifying…",
+    "resendCode": "Resend code"
+  },
   "footer": {
     "rights": "All rights reserved",
     "legal": "Legal information"
@@ -214,6 +239,7 @@
   },
   "legal": {
     "title": "Legal information",
+    "showEmail": "Show email",
     "intro": "General terms, privacy policy and legal notice for Portfolio Arbiter (Reality Explorer Sàrl).",
     "tabs": {
       "cgv": "Terms & Conditions",

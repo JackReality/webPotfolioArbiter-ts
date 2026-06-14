@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { UserCircle } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { getLang } from "@/lib/getLang";
 import { t } from "@/lib/i18n";
@@ -13,7 +14,9 @@ export default async function NavMenu() {
 
   const navItems = [
     { href: "/", label: t("nav.home", lang) },
-    { href: "/subscriber/download", label: t("nav.download", lang) },
+    isLoggedIn
+      ? { href: "/subscriber/myspace", label: t("nav.mySpace", lang) }
+      : { href: "/subscriber/download", label: t("nav.download", lang) },
     { href: "/catalog", label: t("nav.formation", lang) },
     { href: "/contact", label: "Contact" },
   ];
@@ -38,12 +41,10 @@ export default async function NavMenu() {
           items={navItems}
           lang={lang}
           isLoggedIn={isLoggedIn}
-          displayName={session.displayName}
           labels={{
             login: t("nav.login", lang),
             logout: t("nav.logout", lang),
             profile: t("nav.profile", lang),
-            clientArea: t("nav.clientArea", lang),
           }}
         />
 
@@ -52,16 +53,13 @@ export default async function NavMenu() {
           <LanguageSwitcher current={lang} />
 
           {isLoggedIn ? (
-            <div className="flex items-center gap-3 text-sm">
-              <Link href="/subscriber/myspace" className="text-muted-foreground hover:text-foreground transition-colors">
-                {t("nav.clientArea", lang)}
+            <div className="flex items-center gap-3">
+              <Link href="/subscriber/profile" title={session.displayName} className="text-muted-foreground hover:text-foreground transition-colors">
+                <UserCircle className="h-7 w-7" />
               </Link>
-              <Link href="/subscriber/profile" className="text-muted-foreground hover:text-foreground transition-colors">
-                {session.displayName}
-              </Link>
-              <Link href="/api/auth/logout" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/api/auth/logout" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("nav.logout", lang)}
-              </Link>
+              </a>
             </div>
           ) : (
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

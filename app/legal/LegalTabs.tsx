@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
+
+const CONTACT_EMAIL = "contact@realityexplorer.com";
 
 type Article = { title: string; content: string };
 
@@ -12,20 +15,50 @@ interface LegalData {
   mentions: { title: string; articles: Article[] };
 }
 
-function ArticleList({ articles }: { articles: Article[] }) {
+function RevealEmail({ lang }: { lang: string }) {
+  const [shown, setShown] = useState(false);
+  return shown ? (
+    <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline">
+      {CONTACT_EMAIL}
+    </a>
+  ) : (
+    <button
+      onClick={() => setShown(true)}
+      className="underline text-muted-foreground hover:text-foreground transition-colors text-sm"
+    >
+      {t("legal.showEmail", lang)}
+    </button>
+  );
+}
+
+function ArticleContent({ content, lang }: { content: string; lang: string }) {
+  if (!content.includes("{{email}}")) {
+    return <p className="text-muted-foreground text-sm whitespace-pre-line">{content}</p>;
+  }
+  const parts = content.split("{{email}}");
+  return (
+    <p className="text-muted-foreground text-sm whitespace-pre-line">
+      {parts[0]}
+      <RevealEmail lang={lang} />
+      {parts[1]}
+    </p>
+  );
+}
+
+function ArticleList({ articles, lang }: { articles: Article[]; lang: string }) {
   return (
     <div className="space-y-6">
       {articles.map((a, i) => (
         <div key={i}>
           <h3 className="font-semibold text-foreground mb-2">{a.title}</h3>
-          <p className="text-muted-foreground text-sm whitespace-pre-line">{a.content}</p>
+          <ArticleContent content={a.content} lang={lang} />
         </div>
       ))}
     </div>
   );
 }
 
-export default function LegalTabs({ legal }: { legal: LegalData }) {
+export default function LegalTabs({ legal, lang }: { legal: LegalData; lang: string }) {
   const tabs = [
     { value: "cgv", label: legal.tabs.cgv },
     { value: "privacy", label: legal.tabs.privacy },
@@ -58,7 +91,7 @@ export default function LegalTabs({ legal }: { legal: LegalData }) {
       {active === "cgv" && (
         <div>
           <h2 className="text-xl font-semibold mb-6">{legal.cgv.title}</h2>
-          <ArticleList articles={legal.cgv.articles} />
+          <ArticleList articles={legal.cgv.articles} lang={lang} />
         </div>
       )}
 
@@ -68,14 +101,14 @@ export default function LegalTabs({ legal }: { legal: LegalData }) {
           {legal.privacy.intro && (
             <p className="text-muted-foreground text-sm mb-6">{legal.privacy.intro}</p>
           )}
-          <ArticleList articles={legal.privacy.articles} />
+          <ArticleList articles={legal.privacy.articles} lang={lang} />
         </div>
       )}
 
       {active === "mentions" && (
         <div>
           <h2 className="text-xl font-semibold mb-6">{legal.mentions.title}</h2>
-          <ArticleList articles={legal.mentions.articles} />
+          <ArticleList articles={legal.mentions.articles} lang={lang} />
         </div>
       )}
     </>

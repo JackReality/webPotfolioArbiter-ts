@@ -9,6 +9,7 @@
     "logout": "Cerrar sesión",
     "profile": "Mi perfil",
     "copySheet": "Copiar hoja",
+    "mySpace": "Mi Espacio",
     "clientArea": "Área de Cliente"
   },
   "hero": {
@@ -196,6 +197,30 @@
     "button": "Copiar la hoja de Google Sheets",
     "redirectNote": "Serás redirigido a Google Sheets. La hoja se copiará en tu Drive personal."
   },
+  "ERR_CODE_INVALID": "Código incorrecto.",
+  "ERR_CODE_EXPIRED": "Código expirado. Solicita uno nuevo.",
+  "ERR_CODE_NOT_FOUND": "Sin código activo. Solicita uno nuevo.",
+  "ERR_CODE_MAX_ATTEMPTS": "Demasiados intentos. Solicita un nuevo código.",
+  "ERR_PASSWORD_INVALID": "La contraseña actual es incorrecta.",
+  "ERR_PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 8 caracteres.",
+  "ERR_EMAIL_SEND": "No se pudo enviar el correo. Comprueba tu dirección o inténtalo de nuevo.",
+  "ERR_UNAUTHORIZED": "Debes estar conectado.",
+  "ERR_USER_NOT_FOUND": "Usuario no encontrado.",
+  "ERR_FIELDS_REQUIRED": "Todos los campos son obligatorios.",
+  "ERR_PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
+  "resetPassword": {
+    "title": "Cambiar contraseña",
+    "success": "Contraseña cambiada con éxito.",
+    "backToProfile": "Volver al perfil",
+    "codeInfo": "Se enviará un código de verificación a tu dirección de correo.",
+    "codeSentInfo": "Se ha enviado un código a tu dirección de correo.",
+    "sendCode": "Obtener un código por correo",
+    "sending": "Enviando…",
+    "codeLabel": "Código recibido por correo",
+    "confirm": "Confirmar",
+    "verifying": "Verificando…",
+    "resendCode": "Reenviar código"
+  },
   "footer": {
     "rights": "Todos los derechos reservados",
     "legal": "Información legal"
@@ -214,6 +239,7 @@
   },
   "legal": {
     "title": "Información legal",
+    "showEmail": "Mostrar el email",
     "intro": "Condiciones generales, política de privacidad y aviso legal de Portfolio Arbiter (Reality Explorer Sàrl).",
     "tabs": {
       "cgv": "Condiciones generales",

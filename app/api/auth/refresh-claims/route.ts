@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionFromRequest } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import * as UserService from "@/services/UserService";
 import * as UserTrainingService from "@/services/UserTrainingService";
 
 export async function GET(req: NextRequest) {
   const returnUrl = req.nextUrl.searchParams.get("returnUrl") ?? "/";
-  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
-
-  const session = await getSessionFromRequest(req, res);
-  if (!session.id) return res;
+  const session = await getSession();
+  if (!session.id) return NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
 
   const user = await UserService.getById(session.id);
-  if (!user) return res;
+  if (!user) return NextResponse.redirect(new URL("/", req.url), 303);
 
   const trainings = await UserTrainingService.getByUser(Number(user.id));
   const trainingCodes = trainings.map((t) => t.trainingCode);
@@ -22,6 +20,8 @@ export async function GET(req: NextRequest) {
   session.language = user.language;
   session.trainings = trainingCodes;
   await session.save();
+
+  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
 
   const lang = req.nextUrl.searchParams.get("lang");
   if (lang && ["fr", "en", "es"].includes(lang)) {

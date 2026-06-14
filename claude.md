@@ -5,7 +5,7 @@ L'ancien projet Blazor est dans ../webPortfolio-cs
 Lire UNIQUEMENT si besoin de comprendre la logique métier existante.
 
 ## Stack
-Next.js 16 · TypeScript · MySQL Avec Prisma · shadcn/ui · Cookie auth + bcrypt · i18n FR/EN/ES
+Next.js 16 · TypeScript · MySQL Avec Prisma 5.22 · shadcn/ui · Cookie auth + bcrypt · i18n FR/EN/ES
 
 ## Règles non négociables
 1. Code/identifiants en anglais, SQL snake_case, TypeScript camelCase
@@ -54,6 +54,18 @@ middleware.ts            ← vérifie rôle et trainings[]
 - Rôles : public / membre / subscriber / admin
 - Restriction des pages gérée uniquement dans middleware.ts
 - Jamais de restriction déclarée dans la page elle-même
+
+## Règles Next.js App Router
+
+### Liens et navigation
+- `<Link>` uniquement pour naviguer entre pages Next.js (navigation client-side, rapide)
+- `<a>` obligatoire pour : routes `/api/...`, changement de langue, déconnexion — tout ce qui doit déclencher un vrai rechargement HTTP
+- Raison : `<Link>` intercepte le clic côté client et ne soumet pas de requête HTTP complète — le code serveur (cookies, redirects) ne s'exécute pas
+
+### Traductions dans les composants client
+- Tout texte visible dans un `"use client"` passe par `t()` avec un prop `lang: string`, ou par un prop `string` envoyé depuis le composant serveur parent via `t()`
+- Jamais de texte en français (ou toute autre langue) écrit en dur dans un fichier `.tsx`
+- Raison : un texte hardcodé ne se traduit pas et génère des bugs silencieux en EN/ES
 
 ## Multilingue FR/EN/ES
 - User connecté → langue lue depuis son profil en base de données

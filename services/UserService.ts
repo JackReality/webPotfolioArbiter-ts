@@ -47,7 +47,8 @@ export async function remove(id: number): Promise<void> {
 }
 
 export async function changePassword(id: number, newPassword: string): Promise<void> {
-  if (!newPassword || newPassword.length < 6) throw new AppError("ERR_PASSWORD_TOO_SHORT", 1001);
+  const minLength = Number(process.env.MIN_PASSWORD_LENGTH ?? 8);
+  if (!newPassword || newPassword.length < minLength) throw new AppError("ERR_PASSWORD_TOO_SHORT", 1001);
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await prisma.user.update({ where: { id }, data: { passwordHash } });
 }

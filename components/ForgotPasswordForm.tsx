@@ -34,7 +34,7 @@ export default function ForgotPasswordForm({ lang }: { lang: string }) {
     setLoading(true);
     const data = await post({ action: "send-code", email });
     setLoading(false);
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
+    if (data.error) { setError(t(data.error, lang)); return; }
     setStep(2);
   }
 
@@ -44,7 +44,7 @@ export default function ForgotPasswordForm({ lang }: { lang: string }) {
     setLoading(true);
     const data = await post({ action: "verify", email, code, newPassword, confirmPassword });
     setLoading(false);
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
+    if (data.error) { setError(t(data.error, lang)); return; }
     setSuccess(true);
   }
 
@@ -105,7 +105,7 @@ export default function ForgotPasswordForm({ lang }: { lang: string }) {
                     {loading ? "..." : t("auth.updatePassword", lang)}
                   </Button>
                   <button type="button" onClick={handleResend} className="text-sm text-muted-foreground hover:text-foreground w-full text-center">
-                    Renvoyer le code
+                    {t("resetPassword.resendCode", lang)}
                   </button>
                 </form>
               )}

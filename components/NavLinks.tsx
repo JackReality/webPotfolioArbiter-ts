@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, UserCircle } from "lucide-react";
 
 const RED = "#841b26";
 const LANGS = ["fr", "en", "es"] as const;
@@ -14,16 +14,14 @@ interface Props {
   items: NavItem[];
   lang: string;
   isLoggedIn: boolean;
-  displayName?: string;
   labels: {
     login: string;
     logout: string;
     profile: string;
-    clientArea: string;
   };
 }
 
-export default function NavLinks({ items, lang, isLoggedIn, displayName, labels }: Props) {
+export default function NavLinks({ items, lang, isLoggedIn, labels }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -89,17 +87,13 @@ export default function NavLinks({ items, lang, isLoggedIn, displayName, labels 
           {/* Auth */}
           {isLoggedIn ? (
             <>
-              {displayName && (
-                <Link href="/subscriber/profile" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
-                  {displayName}
-                </Link>
-              )}
-              <Link href="/subscriber/myspace" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
-                {labels.clientArea}
+              <Link href="/subscriber/profile" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
+                <UserCircle className="h-5 w-5" />
+                {labels.profile}
               </Link>
-              <Link href="/api/auth/logout" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
+              <a href="/api/auth/logout" className="text-muted-foreground hover:text-foreground transition-colors">
                 {labels.logout}
-              </Link>
+              </a>
             </>
           ) : (
             <Link href="/login" className="text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>

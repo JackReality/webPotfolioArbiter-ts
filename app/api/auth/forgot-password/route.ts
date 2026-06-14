@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
     if (action === "verify") {
       if (!email || !code || !newPassword || !confirmPassword) return err("ERR_FILL_ALL");
       if (newPassword !== confirmPassword) return err("ERR_PASSWORD_MISMATCH");
-      if (newPassword.length < 6) return err("ERR_PASSWORD_TOO_SHORT");
 
       checkCode(email, code);
 

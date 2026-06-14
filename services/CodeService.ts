@@ -6,7 +6,9 @@ interface CodeEntry {
   attempts: number;
 }
 
-const store = new Map<string, CodeEntry>();
+const g = globalThis as unknown as { _codeStore?: Map<string, CodeEntry> };
+const store = g._codeStore ?? new Map<string, CodeEntry>();
+if (process.env.NODE_ENV !== "production") g._codeStore = store;
 
 export function generateCode(email: string): string {
   const code = String(Math.floor(100000 + Math.random() * 900000));

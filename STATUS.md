@@ -31,10 +31,33 @@ Les tâches sont regroupé dans des projets ou le projet Divers si c'est une sim
 
 ### Divers
 
+- [ ] **Tester création de compte** — Vérifier le flux complet `/register` : inscription, email de confirmation, connexion
 - [ ] **Agrandir texte des blocs accueil** — Comparer avec image `jack-import/Comparer taille et épaisseur.png` (image non trouvée, demander à l'utilisateur de la fournir dans `jack-import/`)
-- [ ] **Legal — email anti-bot** — Dans `/legal`, onglet "Mentions légales", afficher l'email de contact avec un bouton "Afficher l'email" (client component) au lieu d'afficher le texte brut — protège contre les bots
 - [ ] **Contact** — Vérifier que le formulaire envoie bien avec l'email du visiteur en `From` (reply-to) pour que le destinataire puisse répondre directement
 - [ ] **Hydratation Dark Reader** — L'erreur de console vient de l'extension Dark Reader dans le navigateur, pas du code. Ignorer en prod, ne pas traiter.
+
+---
+
+## Fait le 2026-06-14
+
+### Corrections bugs reset-password & forgot-password
+
+- [x] `send-code/route.ts` : enveloppé dans try/catch global — erreur SMTP retournait HTML 500 au lieu de JSON
+- [x] `UserService.changePassword` : suppression du `minLength < 6` hardcodé, remplacé par `MIN_PASSWORD_LENGTH` depuis `.env`
+- [x] Architecture corrigée : l'API valide uniquement (code présent, champs remplis, mots de passe identiques) — UserService est le garant de la longueur minimale
+- [x] `forgot-password/route.ts` : suppression du `newPassword.length < 6` dans l'API
+- [x] `ForgotPasswordForm.tsx` : suppression du préfixe `errors.` dans `t(data.error)` — les clés sont à la racine du JSON
+- [x] `ForgotPasswordForm.tsx` : "Renvoyer le code" codé en dur → `t("resetPassword.resendCode", lang)`
+- [x] Traductions ajoutées dans fr/en/es : `ERR_EMAIL_SEND`, `ERR_UNAUTHORIZED`, `ERR_USER_NOT_FOUND`, `ERR_FIELDS_REQUIRED`, `ERR_PASSWORD_MISMATCH`, clés `resetPassword.*`
+
+### Setup débogage VS Code
+
+- [x] `.vscode/launch.json` : config "Next.js debug" attachement port 9230
+- [x] Lancement debug : `node --inspect node_modules/next/dist/bin/next dev` puis F5 dans VS Code
+
+### Convention Next.js 16
+
+- [x] `middleware.ts` supprimé, remplacé par `proxy.ts` avec `export function proxy`
 
 ---
 
@@ -43,7 +66,7 @@ Les tâches sont regroupé dans des projets ou le projet Divers si c'est une sim
 ### Réorganisation arborescence (CLAUDE.md)
 
 - [x] Déplacer pages subscriber dans `app/subscriber/` : myspace, download, stripe-success, profile (+ ProfileForms), reset-password
-- [x] Simplifier `middleware.ts` → `proxy.ts` (Next.js 16) : supprimer entrées individuelles `/profile`, `/myspace` etc., tout couvert par `/subscriber/**`
+- [x] Simplifier `middleware.ts` : supprimer entrées individuelles `/profile`, `/myspace` etc., tout couvert par `/subscriber/**`
 - [x] Mettre à jour tous les liens internes vers les nouvelles URLs `/subscriber/*`
 - [x] Corriger URL succès Stripe : `/stripe-success` → `/subscriber/stripe-success`
 - [x] `next.config.ts` : `allowedDevOrigins: ["127.0.0.1"]`
@@ -67,7 +90,7 @@ Les tâches sont regroupé dans des projets ou le projet Divers si c'est une sim
 
 - [x] `/legal` — Onglets non fonctionnels : extrait `LegalTabs.tsx` client component avec useState
 - [x] Liens langue : `<Link>` → `<a>` dans NavLinks et LanguageSwitcher (forçe rechargement complet)
-- [x] `proxy.ts` : renommage `middleware` → `proxy` (convention Next.js 16)
+- [x] `middleware.ts` : fonction exportée `middleware` (convention Next.js obligatoire)
 
 ---
 
@@ -82,7 +105,7 @@ Les tâches sont regroupé dans des projets ou le projet Divers si c'est une sim
 - [x] Créer `lib/AppError.ts` — classe centrale d'erreurs (code + numéro)
 - [x] Créer `lib/auth.ts` — lecture/écriture du cookie HTTP-only (email, nom, role, langue, trainings[])
 - [x] Créer `lib/i18n.ts` — chargement des fichiers JSON FR/EN/ES (`jack-import/*.json`)
-- [x] Créer `proxy.ts` — vérification rôle et trainings[] par route
+- [x] Créer `middleware.ts` — vérification rôle et trainings[] par route
 - [x] Créer `.env` — variables DB_*, SMTP_*, STRIPE_SECRET_KEY, CONTACT_EMAIL, MAIL_FROM
 
 ### PHASE 2 — Types TypeScript
@@ -141,4 +164,6 @@ Les tâches sont regroupé dans des projets ou le projet Divers si c'est une sim
 - Cookie auth HTTP-only signé : `{ id, email, displayName, role, language, trainings[] }`
 - Restriction des pages : uniquement dans `proxy.ts`, jamais dans les pages elles-mêmes
 - DB : MariaDB 11.8, port 13306, user `portfolio`, base `portfolio_arbiter`
-- Next.js 16 : `middleware.ts` → `proxy.ts`, fonction `proxy` (pas `middleware`)
+- Next.js 16 : middleware se nomme `proxy.ts`, exporte `proxy` (plus `middleware.ts`)
+- Erreurs API : toujours retourner un code (`ERR_*`), jamais du texte en français — traduit côté client via `t(data.error, lang)`
+- Debug VS Code : `node --inspect node_modules/next/dist/bin/next dev` puis attacher sur port 9230

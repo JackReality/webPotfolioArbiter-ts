@@ -9,6 +9,7 @@
     "logout": "Déconnexion",
     "profile": "Mon profil",
     "copySheet": "Copier la feuille",
+    "mySpace": "Mon Espace",
     "clientArea": "Espace Client"
   },
   "hero": {
@@ -196,6 +197,30 @@
     "button": "Copier la feuille Google Sheets",
     "redirectNote": "Vous serez redirigé vers Google Sheets. La feuille sera copiée dans votre Drive personnel."
   },
+  "ERR_CODE_INVALID": "Code incorrect.",
+  "ERR_CODE_EXPIRED": "Code expiré. Demandez un nouveau code.",
+  "ERR_CODE_NOT_FOUND": "Aucun code actif. Demandez un nouveau code.",
+  "ERR_CODE_MAX_ATTEMPTS": "Trop de tentatives. Demandez un nouveau code.",
+  "ERR_PASSWORD_INVALID": "Mot de passe actuel incorrect.",
+  "ERR_PASSWORD_TOO_SHORT": "Le mot de passe doit faire au moins 8 caractères.",
+  "ERR_EMAIL_SEND": "Impossible d'envoyer l'email. Vérifiez votre adresse ou réessayez.",
+  "ERR_UNAUTHORIZED": "Vous devez être connecté.",
+  "ERR_USER_NOT_FOUND": "Utilisateur introuvable.",
+  "ERR_FIELDS_REQUIRED": "Tous les champs sont requis.",
+  "ERR_PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas.",
+  "resetPassword": {
+    "title": "Changer le mot de passe",
+    "success": "Mot de passe modifié avec succès.",
+    "backToProfile": "Retour au profil",
+    "codeInfo": "Un code de vérification sera envoyé à votre adresse email.",
+    "codeSentInfo": "Un code a été envoyé à votre adresse email.",
+    "sendCode": "Obtenir un code par email",
+    "sending": "Envoi…",
+    "codeLabel": "Code reçu par email",
+    "confirm": "Confirmer",
+    "verifying": "Vérification…",
+    "resendCode": "Renvoyer le code"
+  },
   "footer": {
     "rights": "Tous droits réservés",
     "legal": "Informations légales"
@@ -215,6 +240,7 @@
   "legal": {
     "title": "Informations légales",
     "intro": "Conditions générales, politique de confidentialité et mentions légales de Portfolio Arbiter (Reality Explorer Sàrl).",
+    "showEmail": "Afficher l'email",
     "tabs": {
       "cgv": "Conditions générales",
       "privacy": "Confidentialité",

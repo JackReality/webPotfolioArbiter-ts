@@ -29,13 +29,18 @@ export default async function MyspacePage() {
         </CardHeader>
         <CardContent>
           {trainings.length === 0 ? (
-            <p className="text-muted-foreground">Aucune formation achetée.</p>
+            <div className="space-y-3">
+              <p className="text-muted-foreground">Aucune formation achetée.</p>
+              <Link href="/catalog" className={buttonVariants({ variant: "outline" })}>
+                Voir les formations
+              </Link>
+            </div>
           ) : (
             <ul className="space-y-4">
               {trainings.map((t) => (
                 <li key={t.id} className="flex items-center justify-between">
                   <span className="font-medium">{t.title}</span>
-                  <Link href={t.pageUrl ?? "#"} className={buttonVariants()}>
+                  <Link href={t.pageUrl ?? "/catalog"} className={buttonVariants()}>
                     Accéder
                   </Link>
                 </li>
