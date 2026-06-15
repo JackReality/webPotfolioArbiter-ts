@@ -22,21 +22,21 @@ export function generateCode(email: string): string {
 
 export function checkCode(email: string, input: string): void {
   const entry = store.get(email);
-  if (!entry) throw new AppError("ERR_CODE_NOT_FOUND", 2020);
+  if (!entry) throw new AppError("ERR_CODE_NOT_FOUND");
 
   if (Date.now() > entry.expiry) {
     store.delete(email);
-    throw new AppError("ERR_CODE_EXPIRED", 2021);
+    throw new AppError("ERR_CODE_EXPIRED");
   }
 
   if (entry.code !== input.trim()) {
     const attempts = entry.attempts + 1;
     if (attempts >= 5) {
       store.delete(email);
-      throw new AppError("ERR_CODE_MAX_ATTEMPTS", 2022);
+      throw new AppError("ERR_CODE_MAX_ATTEMPTS");
     }
     store.set(email, { ...entry, attempts });
-    throw new AppError("ERR_CODE_INVALID", 2023);
+    throw new AppError("ERR_CODE_INVALID");
   }
 
   store.delete(email);

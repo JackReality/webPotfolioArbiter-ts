@@ -34,10 +34,18 @@ export default function RegisterForm({ lang }: { lang: string }) {
   async function handleStep1(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!displayName || !email || !password || !passwordConfirm) {
+      setError(t("ERR_FIELDS_REQUIRED", lang));
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError(t("ERR_PASSWORD_MISMATCH", lang));
+      return;
+    }
     setLoading(true);
     const data = await post({ action: "send-code", display_name: displayName, email, password, passwordConfirm });
     setLoading(false);
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
+    if (data.error) { setError(t(data.error, lang)); return; }
     setStep(2);
   }
 
@@ -47,8 +55,8 @@ export default function RegisterForm({ lang }: { lang: string }) {
     setLoading(true);
     const data = await post({ action: "verify", email, code, display_name: displayName, password });
     setLoading(false);
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
-    setSuccess(true);
+    if (data.error) { setError(t(data.error, lang)); return; }
+    router.push("/login?registered=1");
   }
 
   async function handleResend() {
@@ -68,7 +76,7 @@ export default function RegisterForm({ lang }: { lang: string }) {
           {success ? (
             <div className="space-y-4">
               <Alert>
-                <AlertDescription>{t("auth.signupSent", lang)}</AlertDescription>
+                <AlertDescription>{t("auth.signupSuccess", lang)}</AlertDescription>
               </Alert>
               <Link href="/login" className={buttonVariants({ variant: "outline" }) + " w-full text-center"}>{t("auth.backToLogin", lang)}</Link>
             </div>
@@ -105,14 +113,14 @@ export default function RegisterForm({ lang }: { lang: string }) {
                 <form onSubmit={handleStep2} className="space-y-4">
                   <p className="text-sm text-muted-foreground">{t("auth.signupSentTitle", lang)} — {email}</p>
                   <div className="space-y-1">
-                    <Label>Code</Label>
+                    <Label>{t("auth.verificationCode", lang)}</Label>
                     <Input value={code} onChange={e => setCode(e.target.value)} maxLength={6} autoComplete="one-time-code" required />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "..." : "Vérifier"}
+                    {loading ? "..." : t("auth.verify", lang)}
                   </Button>
                   <button type="button" onClick={handleResend} className="text-sm text-muted-foreground hover:text-foreground w-full text-center">
-                    Renvoyer le code
+                    {t("resetPassword.resendCode", lang)}
                   </button>
                 </form>
               )}

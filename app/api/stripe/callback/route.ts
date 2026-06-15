@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
     // Mettre à jour le cookie de session
     const session = await getSessionFromRequest(req, res);
-    session.id = Number(user.id);
+    session.id = user.id;
     session.email = user.email;
     session.displayName = user.displayName;
     session.role = ["admin", "moderator"].includes(user.role) ? user.role : "client";

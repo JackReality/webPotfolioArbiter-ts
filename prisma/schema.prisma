@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  id            Int            @id @default(autoincrement()) @db.UnsignedInt
   email         String         @unique(map: "email") @db.VarChar(255)
   passwordHash  String         @map("password_hash") @db.VarChar(255)
   displayName   String         @map("display_name") @db.VarChar(255)
@@ -22,7 +22,7 @@ model User {
 }
 
 model Training {
-  id                    BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  id                    Int      @id @default(autoincrement()) @db.UnsignedInt
   title                 String   @db.VarChar(255)
   language              String   @default("fr") @db.VarChar(5)
   descriptionHtml       String   @map("description_html") @db.LongText
@@ -37,8 +37,8 @@ model Training {
 }
 
 model UserTraining {
-  id              Int      @id @default(autoincrement())
-  userId          BigInt   @map("user_id") @db.UnsignedBigInt
+  id              Int      @id @default(autoincrement()) @db.UnsignedInt
+  userId          Int      @map("user_id") @db.UnsignedInt
   trainingCode    String   @map("training_code") @db.VarChar(50)
   stripeSessionId String?  @map("stripe_session_id") @db.VarChar(255)
   purchasedAt     DateTime @default(now()) @map("purchased_at") @db.DateTime(0)
@@ -48,8 +48,19 @@ model UserTraining {
   @@map("user_trainings")
 }
 
+model LogError {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  route     String   @db.VarChar(255)
+  message   String   @db.Text
+  stack     String?  @db.Text
+  userId    Int?     @map("user_id") @db.UnsignedInt
+
+  @@map("log_errors")
+}
+
 model EmailTemplate {
-  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
   key       String   @db.VarChar(50)
   language  String   @db.VarChar(5)
   subject   String   @db.VarChar(255)

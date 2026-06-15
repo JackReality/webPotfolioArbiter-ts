@@ -10,11 +10,12 @@ import Link from "next/link";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; returnUrl?: string }>;
+  searchParams: Promise<{ error?: string; returnUrl?: string; registered?: string }>;
 }) {
   const lang = await getLang();
   const params = await searchParams;
   const hasError = params.error === "1";
+  const registered = params.registered === "1";
   const returnUrl = params.returnUrl ?? "/";
 
   return (
@@ -25,9 +26,14 @@ export default async function LoginPage({
           <CardDescription>{t("auth.loginSubtitle", lang)}</CardDescription>
         </CardHeader>
         <CardContent>
+          {registered && (
+            <Alert className="mb-4">
+              <AlertDescription>{t("auth.signupSuccess", lang)}</AlertDescription>
+            </Alert>
+          )}
           {hasError && (
             <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{t("errors.ERR_SYSTEM", lang)}</AlertDescription>
+              <AlertDescription>{t("ERR_SYSTEM", lang)}</AlertDescription>
             </Alert>
           )}
           <form action="/api/auth/login" method="POST" className="space-y-4">

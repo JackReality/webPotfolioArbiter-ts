@@ -4,6 +4,7 @@ import * as UserService from "@/services/UserService";
 import * as EmailTemplateService from "@/services/EmailTemplateService";
 import { sendEmail } from "@/services/EmailService";
 import { generateCode, checkCode } from "@/services/CodeService";
+import { logError } from "@/services/LogService";
 
 function ok() { return NextResponse.json({ ok: true }); }
 function err(code: string, status = 400) { return NextResponse.json({ error: code }, { status }); }
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (action === "send-code") {
-      if (!email) return err("ERR_FILL_ALL");
+      if (!email) return err("ERR_FIELDS_REQUIRED");
       // On génère et envoie le code seulement si l'email existe (pour éviter l'énumération d'utilisateurs, on répond toujours ok)
       const user = await UserService.getByEmail(email);
       if (user) {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "verify") {
-      if (!email || !code || !newPassword || !confirmPassword) return err("ERR_FILL_ALL");
+      if (!email || !code || !newPassword || !confirmPassword) return err("ERR_FIELDS_REQUIRED");
       if (newPassword !== confirmPassword) return err("ERR_PASSWORD_MISMATCH");
 
       checkCode(email, code);
@@ -45,6 +46,8 @@ export async function POST(req: NextRequest) {
     return err("ERR_SYSTEM");
   } catch (e) {
     if (e instanceof AppError) return err(e.code);
+    console.error("[forgot-password]", e);
+    if (process.env.NODE_ENV === "production") await logError("/api/auth/forgot-password", e);
     return err("ERR_SYSTEM", 500);
   }
 }

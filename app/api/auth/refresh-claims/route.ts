@@ -8,25 +8,30 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session.id) return NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
 
-  const user = await UserService.getById(session.id);
-  if (!user) return NextResponse.redirect(new URL("/", req.url), 303);
+  try {
+    const user = await UserService.getById(session.id);
+    if (!user) return NextResponse.redirect(new URL("/", req.url), 303);
 
-  const trainings = await UserTrainingService.getByUser(Number(user.id));
-  const trainingCodes = trainings.map((t) => t.trainingCode);
+    const trainings = await UserTrainingService.getByUser(user.id);
+    const trainingCodes = trainings.map((t) => t.trainingCode);
 
-  session.email = user.email;
-  session.displayName = user.displayName;
-  session.role = user.role;
-  session.language = user.language;
-  session.trainings = trainingCodes;
-  await session.save();
+    session.email = user.email;
+    session.displayName = user.displayName;
+    session.role = user.role;
+    session.language = user.language;
+    session.trainings = trainingCodes;
+    await session.save();
 
-  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
+    const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
 
-  const lang = req.nextUrl.searchParams.get("lang");
-  if (lang && ["fr", "en", "es"].includes(lang)) {
-    res.cookies.set("language", lang, { path: "/", maxAge: 60 * 60 * 24 * 365 });
+    const lang = req.nextUrl.searchParams.get("lang");
+    if (lang && ["fr", "en", "es"].includes(lang)) {
+      res.cookies.set("language", lang, { path: "/", maxAge: 60 * 60 * 24 * 365 });
+    }
+
+    return res;
+  } catch (e) {
+    console.error("[refresh-claims]", e);
+    return NextResponse.redirect(new URL("/", req.url), 303);
   }
-
-  return res;
 }

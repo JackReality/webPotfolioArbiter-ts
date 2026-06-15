@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AppError } from "@/lib/AppError";
 import { sendEmail } from "@/services/EmailService";
 import { check, record } from "@/services/ContactGuard";
+import { logError } from "@/services/LogService";
 
 function ok() { return NextResponse.json({ ok: true }); }
 function err(code: string, status = 400) { return NextResponse.json({ error: code }, { status }); }
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
   // Honeypot rempli = bot silencieux
   if (trap) return ok();
 
-  if (!name || !email || !message) return err("ERR_FILL_ALL");
+  if (!name || !email || !message) return err("ERR_FIELDS_REQUIRED");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err("ERR_INVALID_EMAIL");
 
   try {
@@ -31,6 +32,8 @@ export async function POST(req: NextRequest) {
     return ok();
   } catch (e) {
     if (e instanceof AppError) return err(e.code);
+    console.error("[contact]", e);
+    if (process.env.NODE_ENV === "production") await logError("/api/contact", e);
     return err("ERR_SYSTEM", 500);
   }
 }

@@ -3,14 +3,13 @@ import { AppError } from "@/lib/AppError";
 import { getSessionFromRequest } from "@/lib/auth";
 import * as TrainingService from "@/services/TrainingService";
 import { createCheckoutSession } from "@/services/StripeService";
+import { logError } from "@/services/LogService";
 
 export async function POST(req: NextRequest) {
   const res = NextResponse.json({});
   const session = await getSessionFromRequest(req, res);
 
-  if (!session.id) {
-    return NextResponse.json({ error: "not_authenticated" }, { status: 401 });
-  }
+  if (!session.id) return NextResponse.json({ error: "ERR_UNAUTHORIZED" }, { status: 401 });
 
   const { trainingId } = await req.json();
   const training = await TrainingService.getById(trainingId);
@@ -27,6 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url });
   } catch (e) {
     if (e instanceof AppError) return NextResponse.json({ error: e.code }, { status: 400 });
+    console.error("[stripe/checkout]", e);
+    if (process.env.NODE_ENV === "production") await logError("/api/stripe/checkout", e, session.id);
     return NextResponse.json({ error: "ERR_SYSTEM" }, { status: 500 });
   }
 }

@@ -1,30 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { AppError } from "@/lib/AppError";
 import * as UserService from "@/services/UserService";
 import * as CodeService from "@/services/CodeService";
-import { AppError } from "@/lib/AppError";
+import { logError } from "@/services/LogService";
+
+function ok() { return NextResponse.json({ ok: true }); }
+function err(code: string, status = 400) { return NextResponse.json({ error: code }, { status }); }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession();
-  if (!session.id || !session.email)
-    return NextResponse.json({ error: "ERR_UNAUTHORIZED" }, { status: 401 });
-
-  const { code, newPassword } = await req.json();
-  if (!code || !newPassword)
-    return NextResponse.json({ error: "ERR_FIELDS_REQUIRED" }, { status: 400 });
-
   try {
+    const session = await getSession();
+    if (!session.id || !session.email) return err("ERR_UNAUTHORIZED", 401);
+
+    const { code, newPassword } = await req.json();
+    if (!code || !newPassword) return err("ERR_FIELDS_REQUIRED");
+
     CodeService.checkCode(session.email, code);
-  } catch (ex) {
-    if (ex instanceof AppError) return NextResponse.json({ error: ex.code }, { status: 400 });
-    return NextResponse.json({ error: "ERR_SYSTEM" }, { status: 500 });
-  }
-
-  try {
     await UserService.changePassword(session.id, newPassword);
-    return NextResponse.json({ ok: true });
-  } catch (ex) {
-    if (ex instanceof AppError) return NextResponse.json({ error: ex.code }, { status: 400 });
-    return NextResponse.json({ error: "Erreur système" }, { status: 500 });
+    return ok();
+  } catch (e) {
+    if (e instanceof AppError) return err(e.code);
+    console.error("[reset-password]", e);
+    if (process.env.NODE_ENV === "production") await logError("/api/profile/reset-password", e, session?.id);
+    return err("ERR_SYSTEM", 500);
   }
 }

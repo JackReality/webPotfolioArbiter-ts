@@ -96,7 +96,10 @@
     "backToLogin": "Back to login",
     "resetNewTitle": "Choose a new password",
     "signupSentTitle": "Check your inbox",
-    "signupSent": "A confirmation email has just been sent. Click the link to activate your account — don't forget to check your spam folder."
+    "signupSent": "A confirmation email has just been sent. Click the link to activate your account — don't forget to check your spam folder.",
+    "verificationCode": "Verification code",
+    "verify": "Verify",
+    "signupSuccess": "Your account has been created successfully. You can now log in."
   },
   "profile": {
     "title": "My profile",
@@ -206,7 +209,13 @@
   "ERR_EMAIL_SEND": "Unable to send the email. Check your address or try again.",
   "ERR_UNAUTHORIZED": "You must be logged in.",
   "ERR_USER_NOT_FOUND": "User not found.",
+  "ERR_SYSTEM": "An unexpected error occurred. Please try again.",
   "ERR_FIELDS_REQUIRED": "All fields are required.",
+  "ERR_INVALID_EMAIL": "Invalid email address.",
+  "ERR_EMAIL_TAKEN": "This email address is already in use.",
+  "ERR_INVALID_LANG": "Unsupported language.",
+  "ERR_CONTACT_TOO_FAST": "Please wait a few seconds before sending another message.",
+  "ERR_ADMIN_PROTECTED": "This administrator account cannot be modified.",
   "ERR_PASSWORD_MISMATCH": "Passwords do not match.",
   "resetPassword": {
     "title": "Change password",

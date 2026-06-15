@@ -25,13 +25,15 @@ export async function add(
   password: string,
   displayName: string,
   language: string
-): Promise<number> {
-  if (await emailExists(email)) throw new AppError("ERR_EMAIL_TAKEN", 2001);
+): Promise<void> {
+  const minLength = Number(process.env.MIN_PASSWORD_LENGTH ?? 8);
+  if (password.length < minLength) throw new AppError("ERR_PASSWORD_TOO_SHORT");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new AppError("ERR_INVALID_EMAIL");
+  if (await emailExists(email)) throw new AppError("ERR_EMAIL_TAKEN");
   const passwordHash = await bcrypt.hash(password, 12);
-  const user = await prisma.user.create({
+  await prisma.user.create({
     data: { email, passwordHash, displayName, language, role: "subscriber" },
   });
-  return user.id;
 }
 
 export async function update(data: Partial<User> & { id: number }): Promise<void> {
@@ -41,27 +43,27 @@ export async function update(data: Partial<User> & { id: number }): Promise<void
 
 export async function remove(id: number): Promise<void> {
   const user = await getById(id);
-  if (!user) throw new AppError("ERR_USER_NOT_FOUND", 2002);
-  if (user.role === "admin") throw new AppError("ERR_ADMIN_PROTECTED", 2003);
+  if (!user) throw new AppError("ERR_USER_NOT_FOUND");
+  if (user.role === "admin") throw new AppError("ERR_ADMIN_PROTECTED");
   await prisma.user.delete({ where: { id } });
 }
 
 export async function changePassword(id: number, newPassword: string): Promise<void> {
   const minLength = Number(process.env.MIN_PASSWORD_LENGTH ?? 8);
-  if (!newPassword || newPassword.length < minLength) throw new AppError("ERR_PASSWORD_TOO_SHORT", 1001);
+  if (!newPassword || newPassword.length < minLength) throw new AppError("ERR_PASSWORD_TOO_SHORT");
   const passwordHash = await bcrypt.hash(newPassword, 12);
   await prisma.user.update({ where: { id }, data: { passwordHash } });
 }
 
 export async function changeEmail(id: number, newEmail: string): Promise<void> {
-  if (await emailExists(newEmail)) throw new AppError("ERR_EMAIL_TAKEN", 2001);
+  if (await emailExists(newEmail)) throw new AppError("ERR_EMAIL_TAKEN");
   await prisma.user.update({ where: { id }, data: { email: newEmail } });
 }
 
 export async function changeRole(id: number, newRole: string): Promise<void> {
   const user = await getById(id);
-  if (!user) throw new AppError("ERR_USER_NOT_FOUND", 2002);
-  if (user.role === "admin") throw new AppError("ERR_ADMIN_PROTECTED", 2003);
+  if (!user) throw new AppError("ERR_USER_NOT_FOUND");
+  if (user.role === "admin") throw new AppError("ERR_ADMIN_PROTECTED");
   await prisma.user.update({ where: { id }, data: { role: newRole } });
 }
 

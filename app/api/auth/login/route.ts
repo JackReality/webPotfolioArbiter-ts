@@ -14,25 +14,30 @@ export async function POST(req: NextRequest) {
   errorUrl.searchParams.set("error", "1");
   errorUrl.searchParams.set("returnUrl", returnUrl);
 
-  const user = await UserService.getByEmail(email);
-  if (!user) return NextResponse.redirect(errorUrl, 303);
+  try {
+    const user = await UserService.getByEmail(email);
+    if (!user) return NextResponse.redirect(errorUrl, 303);
 
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return NextResponse.redirect(errorUrl, 303);
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) return NextResponse.redirect(errorUrl, 303);
 
-  const trainings = await UserTrainingService.getByUser(Number(user.id));
-  const trainingCodes = trainings.map((t) => t.trainingCode);
+    const trainings = await UserTrainingService.getByUser(user.id);
+    const trainingCodes = trainings.map((t) => t.trainingCode);
 
-  const session = await getSession();
-  session.id = Number(user.id);
-  session.email = user.email;
-  session.displayName = user.displayName;
-  session.role = user.role;
-  session.language = user.language;
-  session.trainings = trainingCodes;
-  await session.save();
+    const session = await getSession();
+    session.id = user.id;
+    session.email = user.email;
+    session.displayName = user.displayName;
+    session.role = user.role;
+    session.language = user.language;
+    session.trainings = trainingCodes;
+    await session.save();
 
-  const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
-  res.cookies.set("language", user.language, { path: "/", maxAge: 60 * 60 * 24 * 365 });
-  return res;
+    const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);
+    res.cookies.set("language", user.language, { path: "/", maxAge: 60 * 60 * 24 * 365 });
+    return res;
+  } catch (e) {
+    console.error("[login]", e);
+    return NextResponse.redirect(errorUrl, 303);
+  }
 }

@@ -96,7 +96,10 @@
     "backToLogin": "Volver al inicio de sesión",
     "resetNewTitle": "Elegir una nueva contraseña",
     "signupSentTitle": "Revisa tu correo",
-    "signupSent": "Acabamos de enviarte un correo de confirmación. Haz clic en el enlace para activar tu cuenta — no olvides revisar tu carpeta de spam."
+    "signupSent": "Acabamos de enviarte un correo de confirmación. Haz clic en el enlace para activar tu cuenta — no olvides revisar tu carpeta de spam.",
+    "verificationCode": "Código de verificación",
+    "verify": "Verificar",
+    "signupSuccess": "Tu cuenta ha sido creada con éxito. Ahora puedes iniciar sesión."
   },
   "profile": {
     "title": "Mi perfil",
@@ -206,7 +209,13 @@
   "ERR_EMAIL_SEND": "No se pudo enviar el correo. Comprueba tu dirección o inténtalo de nuevo.",
   "ERR_UNAUTHORIZED": "Debes estar conectado.",
   "ERR_USER_NOT_FOUND": "Usuario no encontrado.",
+  "ERR_SYSTEM": "Se ha producido un error inesperado. Por favor, inténtalo de nuevo.",
   "ERR_FIELDS_REQUIRED": "Todos los campos son obligatorios.",
+  "ERR_INVALID_EMAIL": "Dirección de correo electrónico no válida.",
+  "ERR_EMAIL_TAKEN": "Esta dirección de correo ya está en uso.",
+  "ERR_INVALID_LANG": "Idioma no compatible.",
+  "ERR_CONTACT_TOO_FAST": "Por favor, espera unos segundos antes de enviar otro mensaje.",
+  "ERR_ADMIN_PROTECTED": "Esta cuenta de administrador no puede modificarse.",
   "ERR_PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
   "resetPassword": {
     "title": "Cambiar contraseña",

@@ -3,7 +3,6 @@ import { getIronSession } from "iron-session";
 import { sessionOptions } from "@/lib/auth";
 import type { SessionData } from "@/lib/auth";
 
-// Routes et le rôle minimum requis (ordre : du plus restrictif au plus large)
 const ROUTE_ROLES: [string, string[]][] = [
   ["/admin", ["admin"]],
   ["/moderator", ["moderator", "admin"]],
@@ -12,18 +11,16 @@ const ROUTE_ROLES: [string, string[]][] = [
   ["/subscriber", ["subscriber", "client", "moderator", "admin"]],
 ];
 
-// Codes formation requis par route
 const TRAINING_ROUTES: [string, string][] = [
   ["/training_portfolio", "PORTFOLIO"],
   ["/training_photoshop", "PHOTOSHOP"],
 ];
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const session = await getIronSession<SessionData>(req, res, sessionOptions);
   const { pathname } = req.nextUrl;
 
-  // Vérification du code formation
   for (const [route, code] of TRAINING_ROUTES) {
     if (pathname.startsWith(route)) {
       if (!session.trainings?.includes(code)) {
@@ -33,7 +30,6 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // Vérification du rôle
   for (const [route, allowedRoles] of ROUTE_ROLES) {
     if (pathname.startsWith(route)) {
       if (!session.role || !allowedRoles.includes(session.role)) {
