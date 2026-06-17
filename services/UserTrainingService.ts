@@ -14,13 +14,19 @@ export async function hasAccess(userId: number, trainingCode: string): Promise<b
   return count > 0;
 }
 
+export async function getByStripeSessionId(stripeSessionId: string): Promise<UserTraining | null> {
+  return prisma.userTraining.findFirst({ where: { stripeSessionId } });
+}
+
 export async function add(
   userId: number,
   trainingCode: string,
-  stripeSessionId: string | null
+  stripeSessionId: string | null,
+  amountCt?: number | null,
+  currency?: string | null
 ): Promise<number> {
   const record = await prisma.userTraining.create({
-    data: { userId, trainingCode, stripeSessionId },
+    data: { userId, trainingCode, stripeSessionId, amountCt, currency },
   });
   return record.id;
 }

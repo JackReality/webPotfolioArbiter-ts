@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getSessionFromRequest } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import * as UserService from "@/services/UserService";
 import * as UserTrainingService from "@/services/UserTrainingService";
 import * as TrainingService from "@/services/TrainingService";
@@ -27,38 +27,57 @@ export async function GET(req: NextRequest) {
     const trainingCode = stripeSession.metadata?.training_code;
     if (!trainingCode) return NextResponse.redirect(errorUrl, 303);
 
-    // Evite le double-enregistrement si l'utilisateur recharge la page
-    const alreadyOwned = await UserTrainingService.hasAccess(userId, trainingCode);
+    const alreadyOwned = await UserTrainingService.getByStripeSessionId(sessionId);
     if (!alreadyOwned) {
-      await UserTrainingService.add(userId, trainingCode, sessionId);
+      const amountCt = stripeSession.amount_total ?? null;
+      const currency = stripeSession.currency ?? null;
+      await UserTrainingService.add(userId, trainingCode, sessionId, amountCt, currency);
     }
 
-    const user = await UserService.getById(userId);
+    const [training, user] = await Promise.all([
+      TrainingService.getByCode(trainingCode),
+      UserService.getById(userId),
+    ]);
     if (!user) return NextResponse.redirect(errorUrl, 303);
 
-    // Passer le rôle à "client" si ce n'est pas déjà admin/moderator
+    // Calcul des mises à jour utilisateur (rôle + communauté)
+    const updates: Parameters<typeof UserService.update>[0] = { id: userId };
+
     if (!["admin", "moderator"].includes(user.role)) {
-      await UserService.changeRole(userId, "client");
+      updates.role = "client";
+    }
+
+    if (training?.axsCommunityMonths) {
+      const base =
+        user.axsCommunityExpire && user.axsCommunityExpire > new Date()
+          ? new Date(user.axsCommunityExpire)
+          : new Date();
+      base.setMonth(base.getMonth() + training.axsCommunityMonths);
+      updates.axsCommunityExpire = base;
+    }
+
+    if (Object.keys(updates).length > 1) {
+      await UserService.update(updates);
     }
 
     const allTrainings = await UserTrainingService.getByUser(userId);
     const trainingCodes = allTrainings.map((t) => t.trainingCode);
 
-    const successUrl = new URL(`/subscriber/stripe-success?code=${encodeURIComponent(trainingCode)}`, req.url);
-    const res = NextResponse.redirect(successUrl, 303);
+    const newRole = updates.role ?? user.role;
+    const newExpire = updates.axsCommunityExpire ?? user.axsCommunityExpire;
+    const communityAccess = newExpire != null && newExpire > new Date();
 
-    // Mettre à jour le cookie de session
-    const session = await getSessionFromRequest(req, res);
+    const session = await getSession();
     session.id = user.id;
     session.email = user.email;
     session.displayName = user.displayName;
-    session.role = ["admin", "moderator"].includes(user.role) ? user.role : "client";
+    session.role = newRole;
     session.language = user.language;
     session.trainings = trainingCodes;
+    session.communityAccess = communityAccess;
     await session.save();
 
     // Email de confirmation si le template est renseigné sur la formation
-    const training = await TrainingService.getByCode(trainingCode);
     if (training?.confirmationEmailHtml) {
       const html = training.confirmationEmailHtml
         .replace(/\{\{\s*\.?(?:DisplayName|Name)\s*\}\}/g, user.displayName)
@@ -70,7 +89,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return res;
+    const successUrl = new URL(
+      `/subscriber/stripe-success?code=${encodeURIComponent(trainingCode)}`,
+      req.url
+    );
+    return NextResponse.redirect(successUrl, 303);
   } catch {
     return NextResponse.redirect(errorUrl, 303);
   }

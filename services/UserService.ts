@@ -7,8 +7,21 @@ export async function getById(id: number): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
 }
 
-export async function getAll(): Promise<User[]> {
-  return prisma.user.findMany({ orderBy: { createdAt: "desc" } });
+export async function getAll() {
+  return prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      userTrainings: {
+        select: {
+          trainingCode: true,
+          stripeSessionId: true,
+          amountCt: true,
+          currency: true,
+          purchasedAt: true,
+        },
+      },
+    },
+  });
 }
 
 export async function getByEmail(email: string): Promise<User | null> {

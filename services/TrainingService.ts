@@ -35,6 +35,6 @@ export async function update(data: Partial<Training> & { id: number }): Promise<
 
 export async function remove(id: number): Promise<void> {
   const training = await getById(id);
-  if (!training) throw new AppError("ERR_TRAINING_NOT_FOUND", 2004);
+  if (!training) throw new AppError("ERR_TRAINING_NOT_FOUND");
   await prisma.training.delete({ where: { id } });
 }

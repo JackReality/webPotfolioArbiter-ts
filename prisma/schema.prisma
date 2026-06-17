@@ -15,8 +15,10 @@ model User {
   language      String         @default("fr") @db.VarChar(5)
   avatarUrl     String?        @map("avatar_url") @db.VarChar(512)
   role          String         @default("subscriber") @db.VarChar(20)
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamp(0)
-  userTrainings UserTraining[]
+  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamp(0)
+  axsCommunityExpire   DateTime?      @map("axs_community_expire") @db.DateTime(0)
+  userTrainings        UserTraining[]
+  logErrors            LogError[]
 
   @@map("users")
 }
@@ -32,6 +34,7 @@ model Training {
   createdAt             DateTime @default(now()) @map("created_at") @db.DateTime(0)
   code                  String   @unique(map: "code") @default("") @db.VarChar(50)
   pageUrl               String?  @map("page_url") @db.VarChar(255)
+  axsCommunityMonths    Int?     @map("axs_community_months") @db.UnsignedInt
 
   @@map("trainings")
 }
@@ -41,6 +44,8 @@ model UserTraining {
   userId          Int      @map("user_id") @db.UnsignedInt
   trainingCode    String   @map("training_code") @db.VarChar(50)
   stripeSessionId String?  @map("stripe_session_id") @db.VarChar(255)
+  amountCt        Int?     @map("amount_ct") @db.UnsignedInt
+  currency        String?  @db.VarChar(3)
   purchasedAt     DateTime @default(now()) @map("purchased_at") @db.DateTime(0)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "user_trainings_ibfk_1")
 
@@ -55,7 +60,9 @@ model LogError {
   message   String   @db.Text
   stack     String?  @db.Text
   userId    Int?     @map("user_id") @db.UnsignedInt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "log_errors_ibfk_1")
 
+  @@index([userId], map: "user_id")
   @@map("log_errors")
 }
 

@@ -11,28 +11,16 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ## À FAIRE
 
-### Session courante
-- [ ] VAlider la règle dans la DB que si suppression d'un user, delete toutes les tables liées. ou noter cette information
-- [ ] pmt Stripe
-- [ ] Créer la page home de la formation portfolio
-- [ ] Améliorer contact, message envoyé avec un vu vert. RAjouter un champ Sujet, qui est mis dans le subject du mail
-- [ ] Terminer toute la logique du site, faire les tâches notées ci-dessous et valider
-- [ ] Commencer le forum, réfléchir au fonctionnalité, puis créer un projet Forum avec les tâches
-
----
-
-### PHASE 8 — Pages admin
-
-- [ ] `/admin/dashboard` — Dashboard : 3 boutons vers users / trainings / email-templates
-- [ ] `/admin/users` — Gestion utilisateurs : tableau (email, nom, rôle, langue, date), dialog changement de rôle, suppression avec confirmation, admins protégés
-- [ ] `/admin/trainings` — Gestion formations : tableau + formulaire ajout/édition (titre, code, langue, descriptionHtml, pageUrl, stripeProductId, stripePriceId, confirmationEmailHtml)
-- [ ] `/admin/email-templates` — Templates emails : onglets par type (confirm_signup / recovery / welcome), sous-onglets FR/EN/ES, édition sujet + corps HTML
-
----
-
-### PHASE 9 — Pages formation
+### PHASE 9 — Pages formation (débloqué maintenant que Stripe fonctionne)
 
 - [ ] `/training_portfolio` — Page formation Portfolio : vérifier training="PORTFOLIO" dans le cookie, afficher titre + descriptionHtml
+
+---
+
+### Divers (à faire après Stripe)
+- [ ] Améliorer contact : message envoyé avec un vu vert, rajouter un champ Sujet dans le subject du mail
+- [ ] Commencer le forum, réfléchir aux fonctionnalités, puis créer un projet Forum avec les tâches
+- [ ] Traduire toutes les pages (form contact non traduit)
 
 ---
 
@@ -40,7 +28,56 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 - [ ] **Agrandir texte des blocs accueil** — Comparer avec image `jack-import/Comparer taille et épaisseur.png` (image non trouvée, demander à l'utilisateur de la fournir dans `jack-import/`)
 - [ ] **Hydratation Dark Reader** — L'erreur de console vient de l'extension Dark Reader dans le navigateur, pas du code. Ignorer en prod, ne pas traiter.
-- [ ] Traduire toutes les pages (J'ai testé form contact et pas traduit)
+
+---
+
+## Fait le 2026-06-17
+
+### PHASE 11 — Paiement Stripe
+
+#### Tâche 1 : Stripe Checkout + Callback
+- [x] Route `POST /api/stripe/checkout` — auth, anti-doublon, crée session Checkout, retourne `url`
+- [x] Route `GET /api/stripe/callback` — vérifie paiement via API Stripe, attribution formation, mise à jour rôle + session + communauté
+- [x] `services/StripeService.ts` — `createCheckoutSession` avec `client_reference_id` + `metadata.training_code`
+- [x] Traductions `ERR_TRAINING_NOT_FOUND`, `ERR_STRIPE_NOT_CONFIGURED`, `ERR_ALREADY_PURCHASED` (fr/en/es)
+- [x] Fix `TrainingService.ts` + `StripeService.ts` — argument parasite sur `AppError`
+- [x] **Testé et confirmé fonctionnel** (paiement test Stripe validé, accès formation attribué)
+
+#### Tâche 2 : Stockage prix/devise + affichage
+- [x] `user_trainings` — ajout colonnes `amount_ct INT UNSIGNED` et `currency VARCHAR(3)` + Prisma push
+- [x] Doublon check via `stripeSessionId` (remplace userId+trainingCode)
+- [x] Callback stocke `amount_total` et `currency` Stripe à l'insertion
+- [x] `myspace/page.tsx` — tableau formations avec colonne Prix (ex: 49.00 CHF), i18n fr/en/es
+- [x] `admin/users` — bouton "Achats" → dialog avec Stripe ID, montant, devise, date (76% largeur)
+
+#### Tâche 3 : Phase 10b + Cascade DB
+- [x] Phase 10b intégrée dans callback : `axs_community_expire` += `axs_community_months` à l'achat
+- [x] `user_trainings.user_id` → `users.id` ON DELETE CASCADE (confirmé en DB)
+- [x] `log_errors.user_id` → `users.id` ON DELETE CASCADE (ajouté + testé : 0 orphelins après suppression)
+- [x] Schéma Prisma mis à jour avec relations FK + `@@index`
+
+---
+
+## Fait le 2026-06-16
+
+### PHASE 10 — Accès Communauté (axs_community_expire)
+
+- [x] **DB** — Ajout colonne `axs_community_expire DATETIME NULL` dans la table `users`
+- [x] **Prisma schema** — Ajout `axsCommunityExpire DateTime?` dans le modèle `User` + client régénéré
+- [x] **Auth / Login** — `SessionData` : ajout `communityAccess: boolean` · route login : calcul et stockage dans la session
+- [x] **Middleware** — Protection `/community/*` via `session.communityAccess` + ajout dans le `matcher`
+
+### PHASE 10b — Durée accès communauté par formation
+
+- [x] **DB** — Ajout `axs_community_months INT UNSIGNED NULL` dans la table `trainings`
+- [x] **Prisma schema** — Ajout `axsCommunityMonths Int?` dans le modèle `Training` + client régénéré
+
+### PHASE 8 — Pages admin
+
+- [x] `/admin/dashboard` — 3 cartes de navigation
+- [x] `/admin/users` — tableau, menu rôle, suppression avec AlertDialog, routes API PATCH/DELETE
+- [x] `/admin/trainings` — tableau, dialog ajout/modification, routes API POST/PATCH
+- [x] `/admin/email-templates` — onglets par type et langue, formulaire édition, route API PATCH
 
 ---
 
@@ -52,24 +89,17 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [x] `schema.prisma` — tous les IDs BigInt → Int @db.UnsignedInt (User, Training, EmailTemplate, UserTraining.id + userId)
 - [x] Corriger `ERR_FILL_ALL` → `ERR_FIELDS_REQUIRED` — `forgot-password/route.ts` (×2), `contact/route.ts`
 - [x] Corriger textes hardcodés en français dans routes profil → codes ERR_*
-- [x] Ajouter try/catch global aux routes sans protection — login, refresh-claims, update-name, request-email-change, set-language, confirm-email-change, reset-password
+- [x] Ajouter try/catch global aux routes sans protection
 - [x] Ajouter traductions manquantes — `ERR_INVALID_LANG`, `ERR_CONTACT_TOO_FAST`, `ERR_ADMIN_PROTECTED` dans fr/en/es
-- [x] DB : BIGINT → INT UNSIGNED dans MySQL via DBeaver (users, trainings, email_templates, user_trainings)
+- [x] DB : BIGINT → INT UNSIGNED dans MySQL via DBeaver
 - [x] Créer table `log_errors` via `prisma db push` + `services/LogService.ts`
 - [x] Brancher `logError()` dans les catch 500 des routes API (production uniquement)
-- [x] Tester flux complet : `/register`, changement de mot de passe, mot de passe oublié
 
 ### Corrections bugs
 
 - [x] `middleware.ts` recréé (proxy.ts supprimé) — Next.js exige ce nom exact
-- [x] `/register` : après validation du code → redirect vers `/login?registered=1` au lieu d'afficher un écran de succès incohérent
-- [x] `login/page.tsx` : affiche message de succès si `registered=1` + corrigé `errors.ERR_SYSTEM` → `ERR_SYSTEM`
-
-### Simplification CLAUDE.md
-
-- [x] Supprimé : Référence, Démarrage, Sauvegarde, dossiers standards
-- [x] Fusionné : Traductions + Multilingue en une seule section
-- [x] Sauvegarde déplacée dans STATUS.md (Règles)
+- [x] `/register` : redirect vers `/login?registered=1` après validation du code
+- [x] `login/page.tsx` : affiche message de succès si `registered=1`
 
 ---
 
@@ -77,51 +107,14 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ### Corrections bugs reset-password & forgot-password
 
-- [x] `send-code/route.ts` : enveloppé dans try/catch global — erreur SMTP retournait HTML 500 au lieu de JSON
-- [x] `UserService.changePassword` : suppression du `minLength < 6` hardcodé, remplacé par `MIN_PASSWORD_LENGTH` depuis `.env`
-- [x] Architecture corrigée : l'API valide uniquement — UserService est le garant de la longueur minimale
+- [x] `send-code/route.ts` : enveloppé dans try/catch global
+- [x] `UserService.changePassword` : `MIN_PASSWORD_LENGTH` depuis `.env`
 - [x] `ForgotPasswordForm.tsx` : suppression du préfixe `errors.` dans `t(data.error)`
-- [x] Traductions ajoutées dans fr/en/es : `ERR_EMAIL_SEND`, `ERR_UNAUTHORIZED`, `ERR_USER_NOT_FOUND`, `ERR_FIELDS_REQUIRED`, `ERR_PASSWORD_MISMATCH`, clés `resetPassword.*`
+- [x] Traductions ajoutées dans fr/en/es : `ERR_EMAIL_SEND`, `ERR_UNAUTHORIZED`, `ERR_USER_NOT_FOUND`, clés `resetPassword.*`
 
 ### Setup débogage VS Code
 
 - [x] `.vscode/launch.json` : config "Next.js debug" attachement port 9230
-
----
-
-## Fait le 2026-06-13
-
-### Réorganisation arborescence
-
-- [x] Déplacer pages subscriber dans `app/subscriber/` : myspace, download, stripe-success, profile, reset-password
-- [x] Mettre à jour tous les liens internes vers les nouvelles URLs `/subscriber/*`
-- [x] `next.config.ts` : `allowedDevOrigins: ["127.0.0.1"]`
-- [x] `layout.tsx` : `suppressHydrationWarning` sur `<html>`
-
-### Connexion base de données
-
-- [x] Corriger port MariaDB : 3306 → 13306
-- [x] Corriger credentials : `root:@` → `portfolio:123@portfolio_arbiter`
-- [x] Régénérer client Prisma après `db pull`
-
-### Navigation et layout
-
-- [x] Footer extrait dans `components/Footer.tsx`
-- [x] Liens langue : `<Link>` → `<a>` dans NavLinks et LanguageSwitcher
-
----
-
-## Fait le 2026-06-12
-
-### PHASE 1-7 — Infrastructure, types, services, routes, pages
-
-- [x] Next.js 16 + TypeScript initialisé, dépendances installées, shadcn/ui configuré
-- [x] `lib/prisma.ts`, `lib/AppError.ts`, `lib/auth.ts`, `lib/i18n.ts`, `middleware.ts`, `.env`
-- [x] Types Prisma : User, Training, UserTraining, EmailTemplate
-- [x] Services : UserService, TrainingService, UserTrainingService, EmailTemplateService, EmailService, CodeService, StripeService
-- [x] Routes API : login, logout, refresh-claims, language/set, stripe/callback
-- [x] Pages publiques : `/`, `/login`, `/register`, `/forgot-password`, `/catalog`, `/contact`, `/legal`, `/access-denied`, `/stripe-error`
-- [x] Pages subscriber : myspace, download, stripe-success, profile, reset-password
 
 ---
 
