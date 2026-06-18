@@ -6,14 +6,8 @@ import type { SessionData } from "@/lib/auth";
 const ROUTE_ROLES: [string, string[]][] = [
   ["/admin", ["admin"]],
   ["/moderator", ["moderator", "admin"]],
-  ["/training_portfolio", ["client", "moderator", "admin"]],
-  ["/training_photoshop", ["client", "moderator", "admin"]],
+  ["/trainings/private", ["client", "moderator", "admin"]],
   ["/subscriber", ["subscriber", "client", "moderator", "admin"]],
-];
-
-const TRAINING_ROUTES: [string, string][] = [
-  ["/training_portfolio", "PORTFOLIO"],
-  ["/training_photoshop", "PHOTOSHOP"],
 ];
 
 export async function middleware(req: NextRequest) {
@@ -21,12 +15,26 @@ export async function middleware(req: NextRequest) {
   const session = await getIronSession<SessionData>(req, res, sessionOptions);
   const { pathname } = req.nextUrl;
 
-  for (const [route, code] of TRAINING_ROUTES) {
-    if (pathname.startsWith(route)) {
-      if (!session.trainings?.includes(code)) {
-        return NextResponse.redirect(new URL("/access-denied", req.url));
+  if (pathname.startsWith("/trainings/private/")) {
+    const code = pathname.split("/")[3]?.toUpperCase();
+    if (!code || !session.trainings?.includes(code)) {
+      if (!session.id) {
+        const loginUrl = new URL("/login", req.url);
+        loginUrl.searchParams.set("returnUrl", pathname);
+        return NextResponse.redirect(loginUrl);
       }
-      break;
+      return NextResponse.redirect(new URL("/access-denied", req.url));
+    }
+  }
+
+  if (pathname.startsWith("/community")) {
+    if (!session.communityAccess) {
+      if (!session.id) {
+        const loginUrl = new URL("/login", req.url);
+        loginUrl.searchParams.set("returnUrl", pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+      return NextResponse.redirect(new URL("/access-denied", req.url));
     }
   }
 
@@ -51,8 +59,8 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/moderator/:path*",
-    "/training_portfolio/:path*",
-    "/training_photoshop/:path*",
+    "/trainings/private/:path*",
     "/subscriber/:path*",
+    "/community/:path*",
   ],
 };

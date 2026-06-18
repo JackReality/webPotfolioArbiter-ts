@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/select";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
+import { t } from "@/lib/i18n";
 
 interface Props {
   displayName: string;
   email: string;
   language: string;
   role: string;
+  lang: string;
 }
 
 function refreshAndRedirect(lang?: string) {
@@ -29,7 +31,7 @@ function refreshAndRedirect(lang?: string) {
   window.location.href = url;
 }
 
-export default function ProfileForms({ displayName, email, language, role }: Props) {
+export default function ProfileForms({ displayName, email, language, role, lang }: Props) {
   const [name, setName] = useState(displayName);
   const [nameError, setNameError] = useState("");
 
@@ -49,7 +51,7 @@ export default function ProfileForms({ displayName, email, language, role }: Pro
       refreshAndRedirect();
     } else {
       const data = await res.json();
-      setNameError(data.error ?? "Erreur");
+      setNameError(t(data.error ?? "ERR_SYSTEM", lang));
     }
   }
 
@@ -73,7 +75,7 @@ export default function ProfileForms({ displayName, email, language, role }: Pro
       setEmailStep("code-sent");
     } else {
       const data = await res.json();
-      setEmailError(data.error ?? "Erreur");
+      setEmailError(t(data.error ?? "ERR_SYSTEM", lang));
     }
   }
 
@@ -88,7 +90,7 @@ export default function ProfileForms({ displayName, email, language, role }: Pro
       refreshAndRedirect();
     } else {
       const data = await res.json();
-      setEmailError(data.error ?? "Erreur");
+      setEmailError(t(data.error ?? "ERR_SYSTEM", lang));
     }
   }
 

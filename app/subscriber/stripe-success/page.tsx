@@ -24,7 +24,7 @@ export default async function StripeSuccessPage({ searchParams }: Props) {
                 Vous avez maintenant accès à la formation
               </p>
               <p className="text-xl font-semibold">{training.title}</p>
-              <Link href={training.pageUrl ?? "#"} className={buttonVariants({ className: "w-full" })}>
+              <Link href={training.privatePageUrl ?? "#"} className={buttonVariants({ className: "w-full" })}>
                 Accéder à la formation
               </Link>
             </>

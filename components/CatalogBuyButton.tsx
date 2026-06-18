@@ -8,9 +8,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export default function CatalogBuyButton({
   trainingId,
   lang,
+  isFree = false,
 }: {
   trainingId: number;
   lang: string;
+  isFree?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function CatalogBuyButton({
     const data = await res.json();
     setLoading(false);
     if (res.status === 401) { window.location.href = "/login"; return; }
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
+    if (data.error) { setError(t(data.error, lang)); return; }
     if (data.url) window.location.href = data.url;
   }
 
@@ -38,7 +40,7 @@ export default function CatalogBuyButton({
         </Alert>
       )}
       <Button onClick={handleBuy} disabled={loading} size="lg">
-        {loading ? "..." : "Acheter"}
+        {loading ? "..." : t(isFree ? "catalog.getFree" : "catalog.buy", lang)}
       </Button>
     </div>
   );

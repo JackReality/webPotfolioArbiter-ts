@@ -163,7 +163,7 @@
       "colCode": "Code",
       "colTitle": "Titre",
       "colLang": "Langue",
-      "colPageUrl": "URL de page",
+      "colPageUrl": "URL privée",
       "colCommunity": "Mois communauté",
       "colActions": "Actions",
       "fieldTitle": "Titre",
@@ -173,7 +173,10 @@
       "fieldStripeProduct": "Stripe Product ID",
       "fieldStripePrice": "Stripe Price ID",
       "fieldConfirmEmail": "Email de confirmation (HTML)",
-      "fieldPageUrl": "URL de la page",
+      "fieldPrivatePageUrl": "URL privée (page de la formation)",
+      "fieldPublicPageUrl": "URL publique (page de description)",
+      "fieldIsFree": "Formation gratuite",
+      "fieldAllowRepurchase": "Rachat autorisé (ex: renouveler l'accès communauté)",
       "fieldCommunityMonths": "Mois d'accès communauté",
       "save": "Enregistrer",
       "cancel": "Annuler",
@@ -214,6 +217,11 @@
     "tags": "Tags",
     "comingSoon": "Forum en construction",
     "comingSoonDesc": "Le forum sera bientôt disponible. Vous y pourrez partager des bugs et des demandes d'amélioration."
+  },
+  "catalog": {
+    "viewTraining": "Voir la formation",
+    "buy": "Acheter",
+    "getFree": "Obtenir gratuitement"
   },
   "formation": {
     "title": "Formation PortfolioArbiter",

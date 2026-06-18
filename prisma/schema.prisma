@@ -33,7 +33,10 @@ model Training {
   confirmationEmailHtml String?  @map("confirmation_email_html") @db.LongText
   createdAt             DateTime @default(now()) @map("created_at") @db.DateTime(0)
   code                  String   @unique(map: "code") @default("") @db.VarChar(50)
-  pageUrl               String?  @map("page_url") @db.VarChar(255)
+  privatePageUrl        String?  @map("private_page_url") @db.VarChar(255)
+  publicPageUrl         String?  @map("public_page_url") @db.VarChar(255)
+  isFree                Boolean  @default(false) @map("is_free")
+  allowRepurchase       Boolean  @default(false) @map("allow_repurchase")
   axsCommunityMonths    Int?     @map("axs_community_months") @db.UnsignedInt
 
   @@map("trainings")

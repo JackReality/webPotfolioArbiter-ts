@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
     const trainings = await UserTrainingService.getByUser(user.id);
     const trainingCodes = trainings.map((t) => t.trainingCode);
 
+    const communityAccess =
+      user.axsCommunityExpire !== null && user.axsCommunityExpire > new Date();
+
     const session = await getSession();
     session.id = user.id;
     session.email = user.email;
@@ -31,6 +34,7 @@ export async function POST(req: NextRequest) {
     session.role = user.role;
     session.language = user.language;
     session.trainings = trainingCodes;
+    session.communityAccess = communityAccess;
     await session.save();
 
     const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);

@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
         .replace(/\{\{\s*\.?(?:DisplayName|Name)\s*\}\}/g, user.displayName)
         .replace(/\{\{\s*\.?Title\s*\}\}/g, training.title);
       try {
-        await sendEmail(user.email, `Confirmation d'achat — ${training.title}`, html);
+        await sendEmail(user.email, training.title, html);
       } catch {
         // Email non bloquant
       }

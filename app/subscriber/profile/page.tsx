@@ -12,6 +12,7 @@ export default async function ProfilePage() {
         email={session.email}
         language={session.language}
         role={session.role}
+        lang={session.language}
       />
     </main>
   );

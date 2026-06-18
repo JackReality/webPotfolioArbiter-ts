@@ -8,7 +8,7 @@ import CatalogBuyButton from "@/components/CatalogBuyButton";
 
 export default async function CatalogPage() {
   const lang = await getLang();
-  const trainings = await TrainingService.getByLanguage(lang);
+  const trainings = await TrainingService.getVisibleByLanguage(lang);
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -26,15 +26,17 @@ export default async function CatalogPage() {
             {i > 0 && <Separator className="my-10" />}
             <div>
               <h2 className="text-2xl font-semibold mb-4">{training.title}</h2>
-              <div className="my-4">
-                <CatalogBuyButton trainingId={training.id} lang={lang} />
-              </div>
               <div
                 className="prose prose-invert prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: training.descriptionHtml }}
               />
-              <div className="my-4">
-                <CatalogBuyButton trainingId={training.id} lang={lang} />
+              <div className="my-4 flex gap-3">
+                <CatalogBuyButton trainingId={training.id} lang={lang} isFree={training.isFree} />
+                {training.publicPageUrl && (
+                  <a href={training.publicPageUrl} className={buttonVariants({ variant: "outline" })}>
+                    {t("catalog.viewTraining", lang)}
+                  </a>
+                )}
               </div>
             </div>
           </div>

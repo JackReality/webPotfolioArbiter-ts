@@ -14,6 +14,21 @@ export async function getByLanguage(language: string): Promise<Training[]> {
   return prisma.training.findMany({ where: { language }, orderBy: { createdAt: "desc" } });
 }
 
+export async function getVisibleByLanguage(language: string): Promise<Training[]> {
+  return prisma.training.findMany({
+    where: {
+      language,
+      title: { not: "" },
+      descriptionHtml: { not: "" },
+      OR: [
+        { isFree: true },
+        { isFree: false, stripeProductId: { not: null }, stripePriceId: { not: null } },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function getByCode(code: string): Promise<Training | null> {
   return prisma.training.findUnique({ where: { code } });
 }
@@ -24,11 +39,13 @@ export async function getByCodes(codes: string[]): Promise<Training[]> {
 }
 
 export async function add(data: Omit<Training, "id" | "createdAt">): Promise<number> {
+  if (data.isFree) data.allowRepurchase = false;
   const training = await prisma.training.create({ data });
   return training.id;
 }
 
 export async function update(data: Partial<Training> & { id: number }): Promise<void> {
+  if (data.isFree) data.allowRepurchase = false;
   const { id, ...fields } = data;
   await prisma.training.update({ where: { id }, data: fields });
 }

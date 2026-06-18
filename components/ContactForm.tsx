@@ -28,7 +28,7 @@ export default function ContactForm({ lang }: { lang: string }) {
     });
     const data = await res.json();
     setLoading(false);
-    if (data.error) { setError(t(`errors.${data.error}`, lang)); return; }
+    if (data.error) { setError(t(data.error, lang)); return; }
     setSuccess(true);
   }
 

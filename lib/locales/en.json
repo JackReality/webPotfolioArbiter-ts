@@ -163,7 +163,7 @@
       "colCode": "Code",
       "colTitle": "Title",
       "colLang": "Language",
-      "colPageUrl": "Page URL",
+      "colPageUrl": "Private URL",
       "colCommunity": "Community months",
       "colActions": "Actions",
       "fieldTitle": "Title",
@@ -173,7 +173,10 @@
       "fieldStripeProduct": "Stripe Product ID",
       "fieldStripePrice": "Stripe Price ID",
       "fieldConfirmEmail": "Confirmation email (HTML)",
-      "fieldPageUrl": "Page URL",
+      "fieldPrivatePageUrl": "Private URL (training page)",
+      "fieldPublicPageUrl": "Public URL (description page)",
+      "fieldIsFree": "Free training",
+      "fieldAllowRepurchase": "Allow repurchase (e.g. renew community access)",
       "fieldCommunityMonths": "Community access months",
       "save": "Save",
       "cancel": "Cancel",
@@ -214,6 +217,11 @@
     "tags": "Tags",
     "comingSoon": "Forum under construction",
     "comingSoonDesc": "The forum will be available soon. You'll be able to share bugs and feature requests."
+  },
+  "catalog": {
+    "viewTraining": "View training",
+    "buy": "Buy",
+    "getFree": "Get for free"
   },
   "formation": {
     "title": "PortfolioArbiter Course",

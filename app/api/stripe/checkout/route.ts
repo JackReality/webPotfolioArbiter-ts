@@ -3,6 +3,7 @@ import { AppError } from "@/lib/AppError";
 import { getSession } from "@/lib/auth";
 import * as TrainingService from "@/services/TrainingService";
 import * as UserTrainingService from "@/services/UserTrainingService";
+import * as UserService from "@/services/UserService";
 import { createCheckoutSession } from "@/services/StripeService";
 import { logError } from "@/services/LogService";
 
@@ -20,7 +21,48 @@ export async function POST(req: NextRequest) {
     if (!training) return NextResponse.json({ error: "ERR_TRAINING_NOT_FOUND" }, { status: 404 });
 
     const alreadyOwned = await UserTrainingService.hasAccess(session.id, training.code);
-    if (alreadyOwned) return NextResponse.json({ error: "ERR_ALREADY_PURCHASED" }, { status: 400 });
+    if (alreadyOwned && !training.allowRepurchase) {
+      return NextResponse.json({ error: "ERR_ALREADY_PURCHASED" }, { status: 400 });
+    }
+
+    if (training.isFree) {
+      const user = await UserService.getById(session.id);
+      if (!user) return NextResponse.json({ error: "ERR_USER_NOT_FOUND" }, { status: 404 });
+
+      await UserTrainingService.add(session.id, training.code, null, 0, null);
+
+      const updates: Parameters<typeof UserService.update>[0] = { id: session.id };
+
+      if (!["admin", "moderator"].includes(user.role)) {
+        updates.role = "client";
+      }
+
+      if (training.axsCommunityMonths) {
+        const base =
+          user.axsCommunityExpire && user.axsCommunityExpire > new Date()
+            ? new Date(user.axsCommunityExpire)
+            : new Date();
+        base.setMonth(base.getMonth() + training.axsCommunityMonths);
+        updates.axsCommunityExpire = base;
+      }
+
+      if (Object.keys(updates).length > 1) {
+        await UserService.update(updates);
+      }
+
+      const allTrainings = await UserTrainingService.getByUser(session.id);
+      const newRole = updates.role ?? user.role;
+      const newExpire = updates.axsCommunityExpire ?? user.axsCommunityExpire;
+
+      session.role = newRole;
+      session.trainings = allTrainings.map((t) => t.trainingCode);
+      session.communityAccess = newExpire != null && newExpire > new Date();
+      await session.save();
+
+      return NextResponse.json({
+        url: `/subscriber/stripe-success?code=${encodeURIComponent(training.code)}`,
+      });
+    }
 
     const base = req.nextUrl.origin;
     const url = await createCheckoutSession(

@@ -11,23 +11,58 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ## À FAIRE
 
-### PHASE 9 — Pages formation (débloqué maintenant que Stripe fonctionne)
+### Prochaine séance — priorités
+1. Démarrer module Forum — réfléchir aux fonctionnalités, créer un projet Forum avec les tâches
 
-- [ ] `/training_portfolio` — Page formation Portfolio : vérifier training="PORTFOLIO" dans le cookie, afficher titre + descriptionHtml
+### PHASE 11 — Suite Stripe (post-lancement)
+- [ ] **Stripe dashboard** — Activer l'envoi automatique des reçus/factures par Stripe aux clients
+- [ ] **Stripe dashboard** — Vérifier la configuration TVA (activer si pas fait)
+- [ ] **Stripe live** — Remplacer les clés test par les clés live dans `.env` avant la mise en prod
+- [ ] **Page `/stripe-error`** — Vérifier qu'elle existe et affiche un message clair avec un lien retour
+- [ ] **Page `/formation`** — Vérifier qu'elle existe (c'est l'URL de retour si le user annule le paiement)
 
----
-
-### Divers (à faire après Stripe)
-- [ ] Améliorer contact : message envoyé avec un vu vert, rajouter un champ Sujet dans le subject du mail
-- [ ] Commencer le forum, réfléchir aux fonctionnalités, puis créer un projet Forum avec les tâches
-- [ ] Traduire toutes les pages (form contact non traduit)
-
----
+### PHASE 9 — Pages formation
+- [ ] `app/trainings/private/portfolio/page.tsx` — construire le vrai contenu (actuellement placeholder)
 
 ### Divers
+- [ ] Améliorer contact : message envoyé avec un vu vert, rajouter un champ Sujet dans le subject du mail
+- [ ] Traduire toutes les pages (form contact non traduit)
+- [ ] **Agrandir texte des blocs accueil** — image de comparaison à fournir dans `jack-import/`
 
-- [ ] **Agrandir texte des blocs accueil** — Comparer avec image `jack-import/Comparer taille et épaisseur.png` (image non trouvée, demander à l'utilisateur de la fournir dans `jack-import/`)
-- [ ] **Hydratation Dark Reader** — L'erreur de console vient de l'extension Dark Reader dans le navigateur, pas du code. Ignorer en prod, ne pas traiter.
+---
+
+## Fait le 2026-06-18
+
+### Module Stripe — finalisation catalogue et formations
+
+- [x] `private_page_url` + `public_page_url` + `is_free` dans la table `trainings` (Prisma + DB)
+- [x] Catalogue : un seul bouton Acheter (bas) + bouton "Voir la formation" → `public_page_url`
+- [x] Filtre catalogue : langue du user + titre + description + Stripe product/price si payante
+- [x] Structure formations : `app/trainings/public/[code]/` et `app/trainings/private/[code]/`
+- [x] Middleware adapté pour protéger `/trainings/private/[code]` dynamiquement (extraction du code depuis l'URL)
+- [x] Pages placeholder portfolio : `/trainings/public/portfolio` et `/trainings/private/portfolio`
+- [x] Formation gratuite : court-circuite Stripe dans le checkout, accès direct + session/rôle/communauté mis à jour
+- [x] Catalogue : bouton "Obtenir gratuitement" pour `isFree=true`, "Acheter" pour payante
+
+### Module Rachat de formation (`allow_repurchase`)
+
+- [x] `allow_repurchase BOOLEAN` ajouté dans `trainings` (défaut `false`)
+- [x] Check anti-doublon déplacé dans le checkout (avant Stripe), pas dans le callback
+- [x] Règle métier dans `TrainingService` : si `isFree=true` → `allowRepurchase` forcé à `false` avant Prisma
+- [x] Formulaire admin : cocher `isFree` décoche automatiquement `allowRepurchase`
+- [x] Case à cocher `allow_repurchase` dans le formulaire admin formation
+
+### Tests confirmés
+
+- [x] Achat formation → rôle `subscriber` mis à jour en `client` — **OK**
+- [x] Achat formation → `axs_community_expire` incrémenté — **OK**
+- [x] Mail de bienvenu reçu après achat — **OK**
+
+### Corrections bugs
+
+- [x] Bug `t(\`errors.\${data.error}\`)` → `t(data.error)` dans `CatalogBuyButton` et `ContactForm`
+- [x] Bug dialog admin "Modifier" : charge maintenant depuis la DB via `GET /api/admin/trainings/[id]` (plus de désync état local)
+- [x] Route `GET /api/admin/trainings/[id]` créée
 
 ---
 
@@ -35,42 +70,27 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ### PHASE 11 — Paiement Stripe
 
-#### Tâche 1 : Stripe Checkout + Callback
 - [x] Route `POST /api/stripe/checkout` — auth, anti-doublon, crée session Checkout, retourne `url`
 - [x] Route `GET /api/stripe/callback` — vérifie paiement via API Stripe, attribution formation, mise à jour rôle + session + communauté
 - [x] `services/StripeService.ts` — `createCheckoutSession` avec `client_reference_id` + `metadata.training_code`
 - [x] Traductions `ERR_TRAINING_NOT_FOUND`, `ERR_STRIPE_NOT_CONFIGURED`, `ERR_ALREADY_PURCHASED` (fr/en/es)
-- [x] Fix `TrainingService.ts` + `StripeService.ts` — argument parasite sur `AppError`
-- [x] **Testé et confirmé fonctionnel** (paiement test Stripe validé, accès formation attribué)
-
-#### Tâche 2 : Stockage prix/devise + affichage
-- [x] `user_trainings` — ajout colonnes `amount_ct INT UNSIGNED` et `currency VARCHAR(3)` + Prisma push
-- [x] Doublon check via `stripeSessionId` (remplace userId+trainingCode)
-- [x] Callback stocke `amount_total` et `currency` Stripe à l'insertion
+- [x] `user_trainings` — colonnes `amount_ct INT UNSIGNED` et `currency VARCHAR(3)`
 - [x] `myspace/page.tsx` — tableau formations avec colonne Prix (ex: 49.00 CHF), i18n fr/en/es
-- [x] `admin/users` — bouton "Achats" → dialog avec Stripe ID, montant, devise, date (76% largeur)
-
-#### Tâche 3 : Phase 10b + Cascade DB
-- [x] Phase 10b intégrée dans callback : `axs_community_expire` += `axs_community_months` à l'achat
-- [x] `user_trainings.user_id` → `users.id` ON DELETE CASCADE (confirmé en DB)
-- [x] `log_errors.user_id` → `users.id` ON DELETE CASCADE (ajouté + testé : 0 orphelins après suppression)
-- [x] Schéma Prisma mis à jour avec relations FK + `@@index`
+- [x] `admin/users` — bouton "Achats" → dialog avec Stripe ID, montant, devise, date
+- [x] Phase 10b : `axs_community_expire` += `axs_community_months` à l'achat
+- [x] `user_trainings.user_id` et `log_errors.user_id` → ON DELETE CASCADE
+- [x] Mail bienvenu envoyé si `confirmation_email_html` non vide
 
 ---
 
 ## Fait le 2026-06-16
 
-### PHASE 10 — Accès Communauté (axs_community_expire)
+### PHASE 10 — Accès Communauté
 
-- [x] **DB** — Ajout colonne `axs_community_expire DATETIME NULL` dans la table `users`
-- [x] **Prisma schema** — Ajout `axsCommunityExpire DateTime?` dans le modèle `User` + client régénéré
-- [x] **Auth / Login** — `SessionData` : ajout `communityAccess: boolean` · route login : calcul et stockage dans la session
-- [x] **Middleware** — Protection `/community/*` via `session.communityAccess` + ajout dans le `matcher`
-
-### PHASE 10b — Durée accès communauté par formation
-
-- [x] **DB** — Ajout `axs_community_months INT UNSIGNED NULL` dans la table `trainings`
-- [x] **Prisma schema** — Ajout `axsCommunityMonths Int?` dans le modèle `Training` + client régénéré
+- [x] Colonne `axs_community_expire DATETIME NULL` dans `users`
+- [x] `SessionData` : ajout `communityAccess: boolean` · login : calcul et stockage dans la session
+- [x] Middleware : protection `/community/*` via `session.communityAccess`
+- [x] Colonne `axs_community_months INT UNSIGNED NULL` dans `trainings`
 
 ### PHASE 8 — Pages admin
 
@@ -85,36 +105,13 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ### Refactoring — Gestion des erreurs & types DB
 
-- [x] Supprimer `numero` de `AppError` — `lib/AppError.ts`, tous les `throw new AppError()` dans les services
-- [x] `schema.prisma` — tous les IDs BigInt → Int @db.UnsignedInt (User, Training, EmailTemplate, UserTraining.id + userId)
-- [x] Corriger `ERR_FILL_ALL` → `ERR_FIELDS_REQUIRED` — `forgot-password/route.ts` (×2), `contact/route.ts`
-- [x] Corriger textes hardcodés en français dans routes profil → codes ERR_*
+- [x] Supprimer `numero` de `AppError` — tous les `throw new AppError()` dans les services
+- [x] `schema.prisma` — tous les IDs BigInt → Int @db.UnsignedInt
+- [x] Corriger textes hardcodés → codes ERR_* + traductions manquantes (fr/en/es)
 - [x] Ajouter try/catch global aux routes sans protection
-- [x] Ajouter traductions manquantes — `ERR_INVALID_LANG`, `ERR_CONTACT_TOO_FAST`, `ERR_ADMIN_PROTECTED` dans fr/en/es
-- [x] DB : BIGINT → INT UNSIGNED dans MySQL via DBeaver
-- [x] Créer table `log_errors` via `prisma db push` + `services/LogService.ts`
-- [x] Brancher `logError()` dans les catch 500 des routes API (production uniquement)
-
-### Corrections bugs
-
-- [x] `middleware.ts` recréé (proxy.ts supprimé) — Next.js exige ce nom exact
+- [x] Créer table `log_errors` + `services/LogService.ts` + `logError()` dans les catch 500 (prod uniquement)
+- [x] `middleware.ts` recréé (proxy.ts supprimé)
 - [x] `/register` : redirect vers `/login?registered=1` après validation du code
-- [x] `login/page.tsx` : affiche message de succès si `registered=1`
-
----
-
-## Fait le 2026-06-14
-
-### Corrections bugs reset-password & forgot-password
-
-- [x] `send-code/route.ts` : enveloppé dans try/catch global
-- [x] `UserService.changePassword` : `MIN_PASSWORD_LENGTH` depuis `.env`
-- [x] `ForgotPasswordForm.tsx` : suppression du préfixe `errors.` dans `t(data.error)`
-- [x] Traductions ajoutées dans fr/en/es : `ERR_EMAIL_SEND`, `ERR_UNAUTHORIZED`, `ERR_USER_NOT_FOUND`, clés `resetPassword.*`
-
-### Setup débogage VS Code
-
-- [x] `.vscode/launch.json` : config "Next.js debug" attachement port 9230
 
 ---
 
@@ -124,6 +121,6 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - Cookie auth HTTP-only signé : `{ id, email, displayName, role, language, trainings[] }`
 - Restriction des pages : uniquement dans `middleware.ts`, jamais dans les pages elles-mêmes
 - DB : MariaDB 11.8, port 13306, user `portfolio`, base `portfolio_arbiter`
-- Next.js : middleware se nomme obligatoirement `middleware.ts`, exporte `middleware` — https://nextjs.org/docs/app/routing/middleware
-- Erreurs API : toujours retourner un code (`ERR_*`), jamais du texte en français — traduit côté client via `t(data.error, lang)`
-- Debug VS Code : `node --inspect node_modules/next/dist/bin/next dev` puis attacher sur port 9230
+- Next.js 16 : middleware se nomme `middleware.ts` — warning "use proxy" → IGNORER, tout fonctionne
+- Erreurs API : toujours `ERR_*`, traduit côté client via `t(data.error, lang)` — jamais `t(\`errors.\${data.error}\`)`
+- Formations : pages publiques `app/trainings/public/[code]/`, privées `app/trainings/private/[code]/`

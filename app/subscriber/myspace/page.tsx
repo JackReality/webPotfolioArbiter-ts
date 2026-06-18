@@ -69,7 +69,7 @@ export default async function MyspacePage() {
                       <TableCell>{price}</TableCell>
                       <TableCell className="text-right">
                         <Link
-                          href={training.pageUrl ?? "/catalog"}
+                          href={training.privatePageUrl ?? "/catalog"}
                           className={buttonVariants({ size: "sm" })}
                         >
                           {t("myspace.access", lang)}

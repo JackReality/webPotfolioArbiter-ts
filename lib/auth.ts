@@ -8,6 +8,7 @@ export interface SessionData {
   role: string;
   language: string;
   trainings: string[];
+  communityAccess: boolean;
 }
 
 export const sessionOptions = {
