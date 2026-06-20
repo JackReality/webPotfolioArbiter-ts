@@ -11,8 +11,36 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ## À FAIRE
 
-### Prochaine séance — priorités
-1. Démarrer module Forum — réfléchir aux fonctionnalités, créer un projet Forum avec les tâches
+### Forum / Communauté
+
+#### Tâche 9 — Style visuel autres onglets
+- [ ] Répliquer dans **onglet Archives** (SubjectCard réutilisé — vérifier que les styles s'appliquent bien)
+
+#### Tâche 10 — Améliorations forum (à faire)
+
+**Divers**
+- [ ] Ajouter une image dans un commentaire ou un sujet, à voir ou celle ci se stock et il faut la réduire
+- [ ] Marquer le commentaire écrit par le médiateur ou admin (Idem) dans la DB aussi, afin de faire des recherche. Les faire ressortir visuellement
+- [ ] Mise à jour des commentaires ou sujets postés par d'autres users (polling ou bouton actualiser)
+
+**Date d'échéance dans la fiche sujet**
+- [ ] Afficher `expiresAt` dans le header de `SubjectCard` : aligné à droite, discret (`text-xs text-muted-foreground`)
+- [ ] Si `expiresAt` est dépassée → archiver automatiquement le sujet (à décider : côté serveur au chargement, ou cron)
+
+**Bouton Archiver un sujet**
+- [ ] Visible pour admin, moderator, et owner du sujet
+- [ ] Appelle `PATCH /api/forum/subjects/[id]` avec `action: "archive"`
+- [ ] Une fois archivé/biffé : tous les pictos disparaissent (plus de modifier, supprimer, répondre, épingler)
+  - S'applique partout : onglet Forum, Suivi, Archives, Biffé, Recherche, dialogue
+
+**Onglet Recherche (nouveau)**
+- [ ] Champs : intervalle de dates (date début / date fin, 1 mois par défaut), texte libre, filtre user
+- [ ] Affichage résultats en hiérarchie inversée (même style que Suivi) — commentaire → parent → sujet
+- [ ] Chaque commentaire affiche un bouton picto 👁️ → ouvre `SubjectDialog` avec highlight du commentaire
+
+**Règle générale — sujets archivés ou biffés**
+- [ ] Dans tous les onglets : si `status === "archived"` ou `status === "hidden"` → masquer tous les pictos d'action (modifier ✏️, supprimer 🗑️, répondre ↩️, épingler 📍, biffer 🚫)
+- [ ] Lecture seule uniquement
 
 ### PHASE 11 — Suite Stripe (post-lancement)
 - [ ] **Stripe dashboard** — Activer l'envoi automatique des reçus/factures par Stripe aux clients
@@ -28,6 +56,63 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [ ] Améliorer contact : message envoyé avec un vu vert, rajouter un champ Sujet dans le subject du mail
 - [ ] Traduire toutes les pages (form contact non traduit)
 - [ ] **Agrandir texte des blocs accueil** — image de comparaison à fournir dans `jack-import/`
+
+---
+
+## Fait le 2026-06-20
+
+### Forum — Dialogue sujet, pictos, rafraîchissement
+
+#### Tâche 8 ✅ — `/community/new` finalisé
+- [x] i18n complète : page convertie en composant serveur, `NewSubjectForm.tsx` client avec `t()` + `lang`
+- [x] Type `announcement` (📢) visible uniquement pour admin et moderator
+
+#### Dialogue "Voir le sujet" ✅
+- [x] `GET /api/forum/subjects/[id]` ajouté (retourne sujet avec `_count.comments`)
+- [x] `getByIdWithCount` ajouté dans `ForumSubjectService`
+- [x] `SubjectDialog.tsx` créé : largeur 75vw, fetch par ID à l'ouverture, réutilise `SubjectCard`
+- [x] `SubjectCard` : prop `initialExpanded` (expand auto dans le dialogue)
+- [x] `SubjectCard` : prop `highlightCommentId` — trait vert gauche + scroll auto vers le commentaire ciblé
+- [x] Highlight fonctionnel pour les commentaires de niveau 1 (réponses) également
+- [x] Fond épinglé ambre + surlignage vert : meilleure visibilité en dark mode (`dark:bg-*/30` au lieu de `/20`)
+
+#### Onglet Suivi — bouton 👁️
+- [x] `SuiviTab` : nouveaux props `userRole` + `displayName` (transmis au dialogue)
+- [x] Bouton 👁️ sur chaque sujet et chaque commentaire → ouvre `SubjectDialog` avec highlight
+- [x] Ligne identité alignée sur le style Forum : `displayName · date (→ addressedTo)` en `text-xs text-muted-foreground`
+- [x] Sujets biffés filtrés dans Suivi pour les non-mods
+
+#### Pictos et visuels
+- [x] Débiffér : 👁️ remplacé par ✅ (dans `SubjectCard` sujet + commentaire) — cohérence avec 👁️ = "voir"
+- [x] Commentaire biffé : texte en `text-red-400` (au lieu d'un fond rouge invisible en dark mode)
+
+#### Rafraîchissement
+- [x] Clic onglet **Forum** → `router.refresh()` (recharge les sujets depuis le serveur)
+- [x] Clic onglet **Suivi** → `suiviKey` incrémenté → re-fetch la date courante affichée
+- [x] Onglet **Biffé** : `onRefreshList` callback sur `SubjectCard` → re-fetch la liste locale après action
+- [x] Bug : débiffér un sujet le retire de Biffé ET le fait apparaître dans Forum
+
+---
+
+## Fait le 2026-06-19
+
+### Forum — Corrections et améliorations visuelles
+
+#### Corrections de bugs
+- [x] Hydration mismatch `Date.now()` dans `SubjectCard` → `useEffect` + `useState(false)` pour `withinEditWindow` et `withinEditWindowSubject`
+- [x] `formatDate` avec `toLocaleDateString("fr-CH")` → format manuel `getUTC*()` + noms de mois hardcodés (pas de dépendance locale Node.js/navigateur)
+- [x] Changement de langue inopérant pour users connectés : `/api/language/set` ne mettait à jour que le cookie simple → mise à jour de `session.language` iron-session également
+- [x] Redirection après login → `/subscriber/myspace` (au lieu de `/`)
+- [x] BiffeTab : ne se charge plus au montage de la page (évite la boucle `useEffect` causant le spinner) → rendu conditionnel avec `{biffeRequested && <BiffeTab />}`
+
+#### Améliorations visuelles commentaires (onglet Forum — à répliquer dans autres onglets)
+- [x] Ligne d'identité (`displayName · date · contexte réponse + pictos`) : `text-xs text-muted-foreground` sur le conteneur — nom en `font-medium`
+- [x] Pictos d'action : `gap-2` → `gap-3` (50% plus espacés)
+- [x] Séparateur entre commentaires niveau 0 : `border-b border-border/30 last:border-0`
+- [x] Liens cliquables dans le contenu (regex URL → `<a target="_blank">`)
+- [x] Contenu tronqué à 3 lignes max (`overflow-hidden max-h-[3.75rem]`) + flèche jaune ▼/▲ pour expand
+- [x] Commentaires épinglés : bordure gauche ambre + fond ambre subtil + `<Separator>` de séparation
+- [x] Confirmation suppression : ✖ rouge (à la place du 🗑️) puis ✔ vert
 
 ---
 
@@ -98,20 +183,6 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [x] `/admin/users` — tableau, menu rôle, suppression avec AlertDialog, routes API PATCH/DELETE
 - [x] `/admin/trainings` — tableau, dialog ajout/modification, routes API POST/PATCH
 - [x] `/admin/email-templates` — onglets par type et langue, formulaire édition, route API PATCH
-
----
-
-## Fait le 2026-06-15
-
-### Refactoring — Gestion des erreurs & types DB
-
-- [x] Supprimer `numero` de `AppError` — tous les `throw new AppError()` dans les services
-- [x] `schema.prisma` — tous les IDs BigInt → Int @db.UnsignedInt
-- [x] Corriger textes hardcodés → codes ERR_* + traductions manquantes (fr/en/es)
-- [x] Ajouter try/catch global aux routes sans protection
-- [x] Créer table `log_errors` + `services/LogService.ts` + `logError()` dans les catch 500 (prod uniquement)
-- [x] `middleware.ts` recréé (proxy.ts supprimé)
-- [x] `/register` : redirect vers `/login?registered=1` après validation du code
 
 ---
 

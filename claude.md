@@ -23,16 +23,20 @@ Next.js 16 · TypeScript · MySQL avec Prisma 5.22 · shadcn/ui · Cookie auth +
 ## Accès formations
 - Réservé aux clients qui possèdent le code formation dans trainings[] du cookie
 - Lu depuis la table user_trainings au login
-- Dossier nommé training_{code} ex: training_portfolio
+- Pages publiques : app/trainings/public/[code]/page.tsx  ex: app/trainings/public/portfolio/page.tsx
+- Pages privées   : app/trainings/private/[code]/page.tsx ex: app/trainings/private/portfolio/page.tsx
+- Sous-pages d'une formation privée : app/trainings/private/portfolio/lesson-2/page.tsx
 
 ## Structure des dossiers (par rôle)
-/app/subscriber          ← subscriber, client, moderator, admin
-/app/moderator           ← moderator et admin
-/app/admin               ← admin seulement
-/app/training_portfolio  ← client avec "portfolio" dans trainings[]
-/app/training_photoshop  ← client avec "photoshop" dans trainings[]
+/app/subscriber                       ← subscriber, client, moderator, admin
+/app/moderator                        ← moderator et admin
+/app/admin                            ← admin seulement
+/app/trainings/public/[code]/         ← accessible à tous (page de présentation)
+/app/trainings/private/[code]/        ← client avec code dans trainings[] du cookie
 middleware.ts            ← vérifie rôle et trainings[] — export function middleware (nom imposé par Next.js)
                            Doc officielle : https://nextjs.org/docs/app/routing/middleware
+                           Protection dynamique : extrait le [code] depuis /trainings/private/[code]/...
+                           ⚠ Next.js 16 affiche un warning "use proxy instead" — IGNORER, tout fonctionne
 
 ## Authentification
 - Cookie HTTP only contenant : email, nom, role, langue, formations[]
@@ -66,6 +70,16 @@ middleware.ts            ← vérifie rôle et trainings[] — export function m
 - update construit la requête automatiquement :
   const { id, ...fields } = obj — colonnes via Object.keys(fields), valeurs via Object.values(fields)
 - Jamais écrire les noms de colonnes manuellement dans update
+
+## ⚠️ Toute logique métier dans les services — sans exception
+- Zéro logique métier dans les routes API, le middleware, ou les pages
+- Cela inclut la construction du cookie/session : un service calcule les champs (ex: communityAccess)
+- Le middleware et les pages lisent uniquement le cookie — ils ne recalculent rien
+- Si la même condition apparaît à deux endroits, c'est un bug : il faut la remonter dans le service
+
+## Forum / Communauté
+Spécification complète dans `forum.md` à la racine du projet.
+Lire ce fichier avant toute tâche liée au forum.
 
 ## Mode de travail
 Proposer les tâches sans coder → validation → une tâche à la fois → s'arrêter après chaque tâche.

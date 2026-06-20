@@ -214,7 +214,7 @@ export default function TrainingsTable({ trainings: initial, lang }: Props) {
             </div>
             <div className="space-y-1">
               <Label>{t("admin.trainings.fieldLang", lang)}</Label>
-              <Select value={form.language} onValueChange={(v) => set("language", v)}>
+              <Select value={form.language ?? ""} onValueChange={(v) => set("language", v ?? "")}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>

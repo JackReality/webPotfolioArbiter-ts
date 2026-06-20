@@ -5,6 +5,7 @@ import * as UserService from "@/services/UserService";
 import * as UserTrainingService from "@/services/UserTrainingService";
 import * as TrainingService from "@/services/TrainingService";
 import { sendEmail } from "@/services/EmailService";
+import { buildSession } from "@/services/SessionService";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "");
 
@@ -60,21 +61,12 @@ export async function GET(req: NextRequest) {
       await UserService.update(updates);
     }
 
-    const allTrainings = await UserTrainingService.getByUser(userId);
-    const trainingCodes = allTrainings.map((t) => t.trainingCode);
-
-    const newRole = updates.role ?? user.role;
-    const newExpire = updates.axsCommunityExpire ?? user.axsCommunityExpire;
-    const communityAccess = newExpire != null && newExpire > new Date();
-
+    const [updatedUser, allTrainings] = await Promise.all([
+      UserService.getById(userId),
+      UserTrainingService.getByUser(userId),
+    ]);
     const session = await getSession();
-    session.id = user.id;
-    session.email = user.email;
-    session.displayName = user.displayName;
-    session.role = newRole;
-    session.language = user.language;
-    session.trainings = trainingCodes;
-    session.communityAccess = communityAccess;
+    Object.assign(session, buildSession(updatedUser!, allTrainings.map((t) => t.trainingCode)));
     await session.save();
 
     // Email de confirmation si le template est renseigné sur la formation

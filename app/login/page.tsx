@@ -16,7 +16,7 @@ export default async function LoginPage({
   const params = await searchParams;
   const hasError = params.error === "1";
   const registered = params.registered === "1";
-  const returnUrl = params.returnUrl ?? "/";
+  const returnUrl = params.returnUrl ?? "/subscriber/myspace";
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">

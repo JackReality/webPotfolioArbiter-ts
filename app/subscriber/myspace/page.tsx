@@ -35,6 +35,19 @@ export default async function MyspacePage() {
         </CardContent>
       </Card>
 
+      {session.communityAccess && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("community.title", lang)}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link href="/community" className={buttonVariants()}>
+              {t("community.access", lang)}
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{t("myspace.formations", lang)}</CardTitle>

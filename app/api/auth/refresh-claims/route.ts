@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import * as UserService from "@/services/UserService";
 import * as UserTrainingService from "@/services/UserTrainingService";
+import { buildSession } from "@/services/SessionService";
 
 export async function GET(req: NextRequest) {
   const returnUrl = req.nextUrl.searchParams.get("returnUrl") ?? "/";
@@ -15,11 +16,7 @@ export async function GET(req: NextRequest) {
     const trainings = await UserTrainingService.getByUser(user.id);
     const trainingCodes = trainings.map((t) => t.trainingCode);
 
-    session.email = user.email;
-    session.displayName = user.displayName;
-    session.role = user.role;
-    session.language = user.language;
-    session.trainings = trainingCodes;
+    Object.assign(session, buildSession(user, trainingCodes));
     await session.save();
 
     const res = NextResponse.redirect(new URL(returnUrl.startsWith("/") ? returnUrl : "/", req.url), 303);

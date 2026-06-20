@@ -5,6 +5,7 @@ import * as TrainingService from "@/services/TrainingService";
 import * as UserTrainingService from "@/services/UserTrainingService";
 import * as UserService from "@/services/UserService";
 import { createCheckoutSession } from "@/services/StripeService";
+import { buildSession } from "@/services/SessionService";
 import { logError } from "@/services/LogService";
 
 export async function POST(req: NextRequest) {
@@ -50,13 +51,11 @@ export async function POST(req: NextRequest) {
         await UserService.update(updates);
       }
 
-      const allTrainings = await UserTrainingService.getByUser(session.id);
-      const newRole = updates.role ?? user.role;
-      const newExpire = updates.axsCommunityExpire ?? user.axsCommunityExpire;
-
-      session.role = newRole;
-      session.trainings = allTrainings.map((t) => t.trainingCode);
-      session.communityAccess = newExpire != null && newExpire > new Date();
+      const [updatedUser, allTrainings] = await Promise.all([
+        UserService.getById(session.id),
+        UserTrainingService.getByUser(session.id),
+      ]);
+      Object.assign(session, buildSession(updatedUser!, allTrainings.map((t) => t.trainingCode)));
       await session.save();
 
       return NextResponse.json({

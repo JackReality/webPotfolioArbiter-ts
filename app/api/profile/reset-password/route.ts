@@ -9,9 +9,11 @@ function ok() { return NextResponse.json({ ok: true }); }
 function err(code: string, status = 400) { return NextResponse.json({ error: code }, { status }); }
 
 export async function POST(req: NextRequest) {
+  let userId: number | undefined;
   try {
     const session = await getSession();
     if (!session.id || !session.email) return err("ERR_UNAUTHORIZED", 401);
+    userId = session.id;
 
     const { code, newPassword } = await req.json();
     if (!code || !newPassword) return err("ERR_FIELDS_REQUIRED");
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     if (e instanceof AppError) return err(e.code);
     console.error("[reset-password]", e);
-    if (process.env.NODE_ENV === "production") await logError("/api/profile/reset-password", e, session?.id);
+    if (process.env.NODE_ENV === "production") await logError("/api/profile/reset-password", e, userId);
     return err("ERR_SYSTEM", 500);
   }
 }
