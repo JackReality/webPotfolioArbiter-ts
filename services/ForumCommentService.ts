@@ -21,10 +21,12 @@ export async function add(
   userId: number,
   displayName: string,
   addressedTo: string | null,
-  content: string
+  content: string,
+  destUserId: number | null,
+  isStaff: boolean
 ): Promise<number> {
   const comment = await prisma.forumComment.create({
-    data: { forumSubjectId, forumCommentId, userId, displayName, addressedTo, content },
+    data: { forumSubjectId, forumCommentId, userId, displayName, addressedTo, content, destUserId, isStaff },
   });
   return comment.id;
 }
@@ -106,26 +108,38 @@ export async function getNextDate(date: Date): Promise<Date | null> {
   return rows[0]?.d ?? null;
 }
 
-export async function getByDate(date: Date, includeHidden = false) {
+export async function getForMe(userId: number) {
+  return prisma.forumComment.findMany({
+    where: {
+      destUserId: userId,
+      status: "visible",
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      subject: { select: { id: true, title: true, type: true, status: true } },
+      parent: { select: { id: true, displayName: true, content: true, status: true } },
+    },
+  });
+}
+
+export async function getSince(date: Date, includeHidden = false) {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999);
 
   const [subjects, comments] = await Promise.all([
     prisma.forumSubject.findMany({
       where: {
-        createdAt: { gte: start, lte: end },
+        createdAt: { gte: start },
         ...(includeHidden ? {} : { status: { not: "hidden" } }),
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     }),
     prisma.forumComment.findMany({
       where: {
-        createdAt: { gte: start, lte: end },
+        createdAt: { gte: start },
         ...(includeHidden ? {} : { status: "visible" }),
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
       include: {
         subject: { select: { id: true, title: true, type: true, status: true } },
         parent: { select: { id: true, displayName: true, content: true, status: true } },

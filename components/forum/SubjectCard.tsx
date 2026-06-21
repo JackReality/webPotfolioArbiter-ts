@@ -22,11 +22,13 @@ const TYPE_PICTO: Record<string, string> = {
 export type SubjectData = {
   id: number;
   userId: number;
+  displayName: string;
   type: string;
   title: string;
   content: string;
   status: string;
   isPinned: boolean;
+  isStaff: boolean;
   expiresAt: string | null;
   createdAt: string;
   updatedAt: string | null;
@@ -40,9 +42,11 @@ export type CommentData = {
   userId: number;
   displayName: string;
   addressedTo: string | null;
+  destUserId: number | null;
   content: string;
   status: string;
   isPinned: boolean;
+  isStaff: boolean;
   likes: number[];
   createdAt: string;
   updatedAt: string | null;
@@ -58,6 +62,7 @@ type Props = {
   initialExpanded?: boolean;
   highlightCommentId?: number;
   onRefreshList?: () => void;
+  readOnly?: boolean;
 };
 
 const URL_REGEX = /https?:\/\/[^\s]+/g;
@@ -97,7 +102,7 @@ function formatDate(iso: string, lang: string) {
   return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
-export default function SubjectCard({ subject, userId, userRole, displayName, isMod, lang, initialExpanded = false, highlightCommentId, onRefreshList }: Props) {
+export default function SubjectCard({ subject, userId, userRole, displayName, isMod, lang, initialExpanded = false, highlightCommentId, onRefreshList, readOnly = false }: Props) {
   const router = useRouter();
   const [expanded, setExpanded] = useState(initialExpanded);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -110,8 +115,8 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
   useEffect(() => {
     setWithinEditWindowSubject(Date.now() - new Date(subject.createdAt).getTime() < 3_600_000);
   }, [subject.createdAt]);
-  const canEditSubject = isSubjectOwner && withinEditWindowSubject;
-  const canDeleteSubject = isSubjectOwner;
+  const canEditSubject = !readOnly && isSubjectOwner && withinEditWindowSubject;
+  const canDeleteSubject = !readOnly && (isSubjectOwner || isMod) && subject.status === "open";
   const isHiddenSubject = subject.status === "hidden";
 
   const [subjectContentExpanded, setSubjectContentExpanded] = useState(false);
@@ -172,6 +177,15 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
     onRefreshList?.();
   }
 
+  async function handleUnarchiveSubject() {
+    await fetch(`/api/forum/subjects/${subject.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "open" }),
+    });
+    onRefreshList?.();
+  }
+
   async function handleToggleHideSubject() {
     await fetch(`/api/forum/subjects/${subject.id}`, {
       method: "PATCH",
@@ -216,7 +230,13 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
   const getReplies = (id: number) => (comments ?? []).filter((c) => c.forumCommentId === id);
 
   return (
-    <Card className={subject.status === "hidden" ? "border-red-200 opacity-75" : ""}>
+    <Card className={
+      subject.status === "hidden"
+        ? "border-red-200 opacity-75"
+        : subject.isStaff
+        ? "border-l-4 border-l-teal-400 bg-zinc-50 dark:bg-zinc-800/40"
+        : ""
+    }>
       <CardHeader
         className="cursor-pointer select-none"
         onClick={handleExpand}
@@ -230,9 +250,17 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
               {subject.status === "closed" && <Badge variant="outline">{t("forum.closed", lang)}</Badge>}
               {subject.status === "hidden" && isMod && <Badge variant="destructive">🚫 {t("forum.hidden", lang)}</Badge>}
               <span className="text-xs text-muted-foreground">
-                {subject._count.comments} {t(subject._count.comments === 1 ? "forum.comment" : "forum.comments", lang)}
+                <span className="font-medium text-foreground">{subject.displayName}</span>
                 {" · "}
                 {formatDate(subject.createdAt, lang)}
+                {subject.updatedAt && (
+                  <> · <span className="italic">{t("forum.modifiedOn", lang)} {formatDate(subject.updatedAt, lang)}</span></>
+                )}
+                {subject.expiresAt && (
+                  <> · <span className={new Date(subject.expiresAt) < new Date() ? "text-destructive" : ""}>{t("forum.expiresOn", lang)} {formatDate(subject.expiresAt, lang)}</span></>
+                )}
+                {" · "}
+                {subject._count.comments} {t(subject._count.comments === 1 ? "forum.comment" : "forum.comments", lang)}
               </span>
               <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
                 {canEditSubject && !isEditingSubject && (
@@ -248,7 +276,16 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                     <button onClick={() => setConfirmDeleteSubject(true)} className="text-xs text-muted-foreground hover:text-destructive transition-colors">🗑️</button>
                   )
                 )}
-                {isMod && (
+                {isMod && subject.status === "archived" && (
+                  <button
+                    onClick={handleUnarchiveSubject}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    title={t("forum.unarchive", lang)}
+                  >
+                    📂
+                  </button>
+                )}
+                {isMod && subject.status !== "archived" && (
                   <button onClick={handleToggleHideSubject} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                     {isHiddenSubject ? "✅" : "🚫"}
                   </button>
@@ -325,6 +362,8 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                     ? "border-l-4 border-green-500 bg-green-50 dark:bg-green-900/30 rounded-r-md pl-3 py-1"
                     : isPinned
                     ? "border-l-4 border-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-r-md pl-3 py-1"
+                    : comment.isStaff
+                    ? "border-l-4 border-teal-400 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-md pl-3 py-1"
                     : "border-b border-border/30 last:border-0"
                 }
               >
@@ -334,6 +373,7 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                   userId={userId}
                   isMod={isMod}
                   lang={lang}
+                  readOnly={readOnly}
                   onLike={handleLike}
                   onReply={handleReply}
                   onRefresh={loadComments}
@@ -346,7 +386,13 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                         <div
                           key={reply.id}
                           ref={isReplyHighlighted ? highlightRef : undefined}
-                          className={isReplyHighlighted ? "border-l-4 border-green-500 bg-green-50 dark:bg-green-900/30 rounded-r-md -ml-3 pl-3 py-1" : ""}
+                          className={
+                            isReplyHighlighted
+                              ? "border-l-4 border-green-500 bg-green-50 dark:bg-green-900/30 rounded-r-md -ml-3 pl-3 py-1"
+                              : reply.isStaff
+                              ? "border-l-4 border-teal-400 bg-zinc-50 dark:bg-zinc-800/40 rounded-r-md -ml-3 pl-3 py-1"
+                              : ""
+                          }
                         >
                           <CommentRow
                             comment={reply}
@@ -354,6 +400,7 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                             userId={userId}
                             isMod={isMod}
                             lang={lang}
+                            readOnly={readOnly}
                             onLike={handleLike}
                             onReply={handleReply}
                             onRefresh={loadComments}
@@ -378,7 +425,7 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
             );
           })()}
 
-          {!isClosed && (
+          {!isClosed && !readOnly && (
             <div className="space-y-2 pt-2">
               {replyTo && (
                 <p className="text-xs text-muted-foreground">
@@ -422,12 +469,13 @@ type CommentRowProps = {
   userId: number;
   isMod: boolean;
   lang: string;
+  readOnly?: boolean;
   onLike: (id: number) => void;
   onReply: (c: CommentData) => void;
   onRefresh: () => void;
 };
 
-function CommentRow({ comment, parentComment, hasReplies = false, userId, isMod, lang, onLike, onReply, onRefresh }: CommentRowProps) {
+function CommentRow({ comment, parentComment, hasReplies = false, userId, isMod, lang, readOnly = false, onLike, onReply, onRefresh }: CommentRowProps) {
   const likes = Array.isArray(comment.likes) ? (comment.likes as number[]) : [];
   const liked = likes.includes(userId);
   const isLevel1 = comment.forumCommentId !== null;
@@ -443,8 +491,8 @@ function CommentRow({ comment, parentComment, hasReplies = false, userId, isMod,
   useEffect(() => {
     setWithinEditWindow(Date.now() - new Date(comment.createdAt).getTime() < 3_600_000);
   }, [comment.createdAt]);
-  const canEdit = isOwner && withinEditWindow;
-  const canDelete = isOwner && !hasReplies;
+  const canEdit = !readOnly && isOwner && withinEditWindow;
+  const canDelete = !readOnly && isOwner && !hasReplies;
   const isHidden = comment.status === "hidden";
 
   if (isHidden && !isMod) return null;
@@ -490,10 +538,12 @@ function CommentRow({ comment, parentComment, hasReplies = false, userId, isMod,
           )}
           {isHidden && isMod && <span className="text-xs text-destructive">🚫</span>}
           <div className="flex gap-3 items-center">
-            <button onClick={() => onLike(comment.id)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              {liked ? "❤️" : "🤍"}{likes.length > 0 ? ` ${likes.length}` : ""}
-            </button>
-            {!isEditing && (
+            {!readOnly && (
+              <button onClick={() => onLike(comment.id)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {liked ? "❤️" : "🤍"}{likes.length > 0 ? ` ${likes.length}` : ""}
+              </button>
+            )}
+            {!readOnly && !isEditing && (
               <button onClick={() => onReply(comment)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 ↩️
               </button>
@@ -515,7 +565,7 @@ function CommentRow({ comment, parentComment, hasReplies = false, userId, isMod,
                 </button>
               )
             )}
-            {isMod && !isLevel1 && (
+            {isMod && !readOnly && !isLevel1 && (
               <button
                 onClick={async () => {
                   await fetch(`/api/forum/comments/${comment.id}`, {

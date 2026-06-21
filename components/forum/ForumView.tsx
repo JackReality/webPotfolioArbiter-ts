@@ -8,6 +8,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import SubjectCard, { type SubjectData } from "./SubjectCard";
 import SuiviTab from "./SuiviTab";
+import PourMoiTab from "./PourMoiTab";
+import RechercheTab from "./RechercheTab";
 
 type Props = {
   subjects: SubjectData[];
@@ -23,11 +25,12 @@ export default function ForumView({ subjects, lastDate, lang, userId, userRole, 
   const router = useRouter();
   const [archives, setArchives] = useState<SubjectData[] | null>(null);
   const [loadingArchives, setLoadingArchives] = useState(false);
-  const [biffeRequested, setBiffeRequested] = useState(false);
   const [suiviKey, setSuiviKey] = useState(0);
+  const [pourMoiKey, setPourMoiKey] = useState(0);
+  const [biffeKey, setBiffeKey] = useState(0);
 
-  async function loadArchives() {
-    if (archives !== null) return;
+  async function loadArchives(force = false) {
+    if (archives !== null && !force) return;
     setLoadingArchives(true);
     const res = await fetch("/api/forum/subjects?filter=archived");
     const data = await res.json();
@@ -35,11 +38,14 @@ export default function ForumView({ subjects, lastDate, lang, userId, userRole, 
     setLoadingArchives(false);
   }
 
+  function reloadArchives() { loadArchives(true); }
+
   function handleTabChange(value: string) {
     if (value === "forum") router.refresh();
     if (value === "suivi") setSuiviKey((k) => k + 1);
-    if (value === "archives") loadArchives();
-    if (value === "biffe") setBiffeRequested(true);
+    if (value === "pour-moi") setPourMoiKey((k) => k + 1);
+    if (value === "archives") reloadArchives();
+    if (value === "biffe") setBiffeKey((k) => k + 1);
   }
 
   return (
@@ -47,6 +53,8 @@ export default function ForumView({ subjects, lastDate, lang, userId, userRole, 
       <TabsList className="h-auto p-1 gap-1 mb-0">
         <TabsTrigger value="forum" className="px-6 py-2">{t("forum.tabForum", lang)}</TabsTrigger>
         <TabsTrigger value="suivi" className="px-6 py-2">{t("forum.tabSuivi", lang)}</TabsTrigger>
+        <TabsTrigger value="pour-moi" className="px-6 py-2">{t("forum.tabPourMoi", lang)}</TabsTrigger>
+        <TabsTrigger value="recherche" className="px-6 py-2">{t("forum.tabRecherche", lang)}</TabsTrigger>
         <TabsTrigger value="archives" className="px-6 py-2">{t("forum.tabArchives", lang)}</TabsTrigger>
         {isMod && (
           <TabsTrigger value="biffe" className="px-6 py-2">{t("forum.tabBiffe", lang)}</TabsTrigger>
@@ -103,13 +111,36 @@ export default function ForumView({ subjects, lastDate, lang, userId, userRole, 
             displayName={displayName}
             isMod={isMod}
             lang={lang}
+            readOnly
+            onRefreshList={reloadArchives}
           />
         ))}
       </TabsContent>
 
+      <TabsContent value="pour-moi" className="border rounded-b-lg rounded-tr-lg p-6 mt-0">
+        <PourMoiTab
+          key={pourMoiKey}
+          lang={lang}
+          userId={userId}
+          userRole={userRole}
+          displayName={displayName}
+          isMod={isMod}
+        />
+      </TabsContent>
+
+      <TabsContent value="recherche" className="border rounded-b-lg rounded-tr-lg p-6 mt-0">
+        <RechercheTab
+          lang={lang}
+          userId={userId}
+          userRole={userRole}
+          displayName={displayName}
+          isMod={isMod}
+        />
+      </TabsContent>
+
       {isMod && (
         <TabsContent value="biffe" className="border rounded-b-lg rounded-tr-lg p-6 space-y-4 mt-0">
-          {biffeRequested && <BiffeTab lang={lang} userId={userId} isMod={isMod} userRole={userRole} displayName={displayName} />}
+          {biffeKey > 0 && <BiffeTab key={biffeKey} lang={lang} userId={userId} isMod={isMod} userRole={userRole} displayName={displayName} />}
         </TabsContent>
       )}
     </Tabs>
@@ -149,6 +180,7 @@ function BiffeTab({ lang, userId, isMod, userRole, displayName }: { lang: string
           displayName={displayName}
           isMod={isMod}
           lang={lang}
+          readOnly
           onRefreshList={fetchList}
         />
       ))}

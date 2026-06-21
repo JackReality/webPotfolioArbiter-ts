@@ -73,16 +73,18 @@ model LogError {
 }
 
 model ForumSubject {
-  id        Int            @id @default(autoincrement()) @db.UnsignedInt
-  userId    Int            @map("user_id") @db.UnsignedInt
-  type      String         @db.VarChar(20)
-  title     String         @db.VarChar(255)
-  content   String         @db.Text
-  status    String         @default("open") @db.VarChar(20)
-  isPinned  Boolean        @default(false) @map("is_pinned")
-  expiresAt DateTime?      @map("expires_at") @db.DateTime(0)
-  createdAt DateTime       @default(now()) @map("created_at") @db.DateTime(0)
-  updatedAt DateTime?      @map("updated_at") @db.DateTime(0)
+  id          Int            @id @default(autoincrement()) @db.UnsignedInt
+  userId      Int            @map("user_id") @db.UnsignedInt
+  displayName String         @default("") @map("display_name") @db.VarChar(100)
+  type        String         @db.VarChar(20)
+  title       String         @db.VarChar(255)
+  content     String         @db.Text
+  status      String         @default("open") @db.VarChar(20)
+  isPinned    Boolean        @default(false) @map("is_pinned")
+  isStaff     Boolean        @default(false) @map("is_staff")
+  expiresAt   DateTime?      @map("expires_at") @db.DateTime(0)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt   DateTime?      @map("updated_at") @db.DateTime(0)
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "forum_subject_ibfk_1")
   comments  ForumComment[]
 
@@ -97,9 +99,11 @@ model ForumComment {
   userId         Int           @map("user_id") @db.UnsignedInt
   displayName    String        @map("display_name") @db.VarChar(100)
   addressedTo    String?       @map("addressed_to") @db.VarChar(100)
+  destUserId     Int?          @map("dest_user_id") @db.UnsignedInt
   content        String        @db.Text
   status         String        @default("visible") @db.VarChar(20)
   isPinned       Boolean       @default(false) @map("is_pinned")
+  isStaff        Boolean       @default(false) @map("is_staff")
   likes          Json          @default("[]")
   createdAt      DateTime      @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt      DateTime?     @map("updated_at") @db.DateTime(0)

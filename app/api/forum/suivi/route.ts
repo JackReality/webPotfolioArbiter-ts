@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const date = dateParam ? new Date(dateParam) : new Date();
 
     const [data, prev, next] = await Promise.all([
-      ForumCommentService.getByDate(date, isMod),
+      ForumCommentService.getSince(date, isMod),
       ForumCommentService.getPrevDate(date),
       ForumCommentService.getNextDate(date),
     ]);

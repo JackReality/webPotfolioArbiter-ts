@@ -68,6 +68,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       if (!isMod(role))
         return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
       await ForumSubjectService.setStatus(subjectId, action === "hide" ? "hidden" : "open");
+    } else if (action === "open") {
+      if (!isMod(role))
+        return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
+      await ForumSubjectService.setStatus(subjectId, "open");
     } else {
       return NextResponse.json({ error: "ERR_INVALID_ACTION" }, { status: 400 });
     }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { t } from "@/lib/i18n";
 import type { CommentData } from "./SubjectCard";
 import SubjectDialog from "./SubjectDialog";
@@ -23,6 +23,10 @@ const TYPE_PICTO: Record<string, string> = {
   question: "❓", share: "💬", request: "🙋", bug: "🐛", announcement: "📢",
 };
 
+function toDateInput(d: Date) {
+  return d.toISOString().split("T")[0];
+}
+
 type SubjectSnap = { id: number; type: string; title: string; status: string };
 
 type CommentWithContext = CommentData & {
@@ -30,28 +34,21 @@ type CommentWithContext = CommentData & {
   parent: { id: number; displayName: string; content: string; status: string } | null;
 };
 
-type SuiviSubject = {
+type SearchSubject = {
   id: number;
   type: string;
   title: string;
+  displayName: string;
   content: string;
   status: string;
   isStaff: boolean;
-  displayName: string;
   createdAt: string;
+  _count: { comments: number };
 };
 
-type SuiviData = {
-  date: string;
-  prev: string | null;
-  next: string | null;
-  subjects: SuiviSubject[];
-  comments: CommentWithContext[];
-};
+type SearchResults = { subjects: SearchSubject[]; comments: CommentWithContext[] };
 
 type Props = {
-  initialDate: string | null;
-  suiviKey: number;
   lang: string;
   userId: number;
   userRole: string;
@@ -59,119 +56,106 @@ type Props = {
   isMod: boolean;
 };
 
-export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole, displayName, isMod }: Props) {
-  const [data, setData] = useState<SuiviData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function RechercheTab({ lang, userId, userRole, displayName, isMod }: Props) {
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+
+  const [query, setQuery] = useState("");
+  const [author, setAuthor] = useState("");
+  const [addressee, setAddressee] = useState("");
+  const [staffOnly, setStaffOnly] = useState(false);
+  const [dateFrom, setDateFrom] = useState(toDateInput(threeMonthsAgo));
+  const [dateTo, setDateTo] = useState(toDateInput(new Date()));
+
+  const [results, setResults] = useState<SearchResults | null>(null);
+  const [loading, setLoading] = useState(false);
   const [openSubjectId, setOpenSubjectId] = useState<number | null>(null);
   const [openCommentId, setOpenCommentId] = useState<number | null>(null);
 
-  async function load(date: string, updateLastRead: boolean) {
+  async function handleSearch() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/forum/suivi?date=${date}`);
-      const json: SuiviData = await res.json();
-      setData(json);
+      const params = new URLSearchParams();
+      if (query.trim()) params.set("q", query.trim());
+      if (author.trim()) params.set("author", author.trim());
+      if (addressee.trim()) params.set("addressee", addressee.trim());
+      if (staffOnly) params.set("staff", "1");
+      if (dateFrom) params.set("from", dateFrom);
+      if (dateTo) params.set("to", dateTo);
+
+      const res = await fetch(`/api/forum/search?${params}`);
+      const data = await res.json();
+      setResults(data.error ? null : data);
     } catch (e) {
-      console.error("[SuiviTab] fetch error", e);
+      console.error("[RechercheTab] fetch error", e);
     } finally {
       setLoading(false);
     }
-    if (updateLastRead) {
-      await fetch("/api/forum/last-read", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date }),
-      });
-    }
   }
 
-  useEffect(() => {
-    const startDate = initialDate ?? new Date().toISOString().split("T")[0];
-    load(startDate, false);
-  }, [initialDate]);
-
-  useEffect(() => {
-    if (suiviKey === 0) return;
-    const dateToLoad = data?.date ?? initialDate ?? new Date().toISOString().split("T")[0];
-    load(dateToLoad, false);
-  }, [suiviKey]);
-
-  function formatDay(iso: string) {
-    return new Date(iso).toLocaleDateString(
-      lang === "fr" ? "fr-CH" : lang === "es" ? "es-ES" : "en-GB",
-      { weekday: "long", day: "numeric", month: "long", year: "numeric" }
-    );
-  }
-
-  if (loading || !data) {
-    return <p className="text-sm text-muted-foreground py-4">{t("common.loading", lang)}</p>;
-  }
-
-  const todayStr = new Date().toISOString().split("T")[0];
-  const isToday = data.date === todayStr;
-  const hasContent = data.subjects.length > 0 || data.comments.length > 0;
-
-  function handleToday() {
-    load(todayStr, true);
-  }
-
-  // Merge subjects + comments, sort chronologically (asc)
+  // Merged feed sorted recent→old
   type FeedItem =
-    | { kind: "subject"; item: SuiviSubject }
+    | { kind: "subject"; item: SearchSubject }
     | { kind: "comment"; item: CommentWithContext };
 
-  const feed: FeedItem[] = [
-    ...data.subjects
-      .filter(s => isMod || s.status !== "hidden")
-      .map(s => ({ kind: "subject" as const, item: s })),
-    ...data.comments
-      .filter(c => isMod || c.status !== "hidden")
-      .map(c => ({ kind: "comment" as const, item: c })),
-  ].sort((a, b) => a.item.createdAt.localeCompare(b.item.createdAt));
+  const feed: FeedItem[] = results
+    ? [
+        ...results.subjects.map((s) => ({ kind: "subject" as const, item: s })),
+        ...results.comments.map((c) => ({ kind: "comment" as const, item: c })),
+      ].sort((a, b) => b.item.createdAt.localeCompare(a.item.createdAt))
+    : [];
 
   return (
     <div className="space-y-4">
-      {/* Navigation date — centrée */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={!data.prev}
-            onClick={() => data.prev && load(data.prev, false)}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <span className="text-sm font-medium capitalize min-w-[220px] text-center">
-            {formatDay(data.date)}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => load(data.next ?? todayStr, true)}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+      {/* Formulaire */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">{t("forum.searchQuery", lang)}</label>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("forum.searchPlaceholder", lang)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          />
         </div>
-        {!isToday && (
-          <button
-            onClick={handleToday}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-          >
-            {t("forum.today", lang)}
-          </button>
-        )}
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">{t("forum.searchAuthor", lang)}</label>
+          <Input value={author} onChange={(e) => setAuthor(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">{t("forum.searchAddressee", lang)}</label>
+          <Input value={addressee} onChange={(e) => setAddressee(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSearch()} />
+        </div>
+        <div className="flex items-center gap-2 pt-5">
+          <input
+            type="checkbox"
+            id="staff-only"
+            checked={staffOnly}
+            onChange={(e) => setStaffOnly(e.target.checked)}
+            className="w-4 h-4 accent-teal-500"
+          />
+          <label htmlFor="staff-only" className="text-sm cursor-pointer">{t("forum.searchStaff", lang)}</label>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">{t("forum.searchFrom", lang)}</label>
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        </div>
+        <div className="space-y-1">
+          <label className="text.xs text-muted-foreground">{t("forum.searchTo", lang)}</label>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        </div>
       </div>
+      <Button onClick={handleSearch} disabled={loading} size="sm">
+        {loading ? "…" : t("forum.searchButton", lang)}
+      </Button>
 
-      {!hasContent && (
-        <p className="text-sm text-muted-foreground text-center py-6">
-          {isToday ? t("forum.noPostsThisDay", lang) : t("forum.noPostsSince", lang)}
-        </p>
+      {/* Résultats */}
+      {results !== null && feed.length === 0 && (
+        <p className="text-sm text-muted-foreground py-4">{t("forum.searchEmpty", lang)}</p>
       )}
 
-      {/* Feed 3 colonnes */}
       <div className="space-y-2">
-        {feed.map(entry => {
+        {feed.map((entry) => {
           if (entry.kind === "subject") {
             const s = entry.item;
             return (
@@ -184,7 +168,6 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
                         <span className="font-medium text-foreground">{s.title}</span>
                         <span>· {s.displayName}</span>
                         <span>· {formatDate(s.createdAt, lang)}</span>
-                        {s.status === "hidden" && isMod && <span className="text-destructive">🚫</span>}
                         <button
                           onClick={() => { setOpenSubjectId(s.id); setOpenCommentId(null); }}
                           className="hover:text-foreground transition-colors"
@@ -207,8 +190,8 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
 
           return (
             <div key={`c-${c.id}`} className="grid grid-cols-3 gap-2 items-start">
-              {/* Gauche : le commentaire (plus spécifique) */}
-              <div className={`border rounded p-2 ${c.isStaff ? "border-l-4 border-l-teal-400 bg-zinc-50 dark:bg-zinc-800/40" : "bg-card"} ${c.status === "hidden" ? "opacity-60" : ""}`}>
+              {/* Gauche : commentaire */}
+              <div className={`border rounded p-2 ${c.isStaff ? "border-l-4 border-l-teal-400 bg-zinc-50 dark:bg-zinc-800/40" : "bg-card"}`}>
                 <div className="flex gap-2">
                   <span className="text-sm mt-0.5">{isLevel1 ? "↩️" : "🗨️"}</span>
                   <div className="flex-1 min-w-0">
@@ -216,7 +199,6 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
                       <span className="font-medium text-foreground">{c.displayName}</span>
                       <span>· {formatDate(c.createdAt, lang)}</span>
                       {isLevel1 && c.addressedTo && <span>(→ {c.addressedTo})</span>}
-                      {c.status === "hidden" && isMod && <span className="text-destructive">🚫</span>}
                       <span>{liked ? "❤️" : "🤍"}{likes.length > 0 ? ` ${likes.length}` : ""}</span>
                       <button
                         onClick={() => { setOpenSubjectId(c.subject.id); setOpenCommentId(c.id); }}
@@ -229,7 +211,7 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
                 </div>
               </div>
 
-              {/* Milieu : parent du commentaire (si niveau 1) ou sujet (si niveau 0) */}
+              {/* Milieu : parent (si niveau 1) ou sujet (si niveau 0) */}
               <div className="border rounded p-2 bg-muted/20 text-muted-foreground">
                 {isLevel1 && c.parent ? (
                   <div className="flex gap-2">
@@ -247,7 +229,7 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
                 )}
               </div>
 
-              {/* Droite : sujet (uniquement si niveau 1) */}
+              {/* Droite : sujet (si niveau 1) */}
               {isLevel1 ? (
                 <div className="border rounded p-2 bg-muted/10 text-muted-foreground">
                   <div className="flex gap-2">

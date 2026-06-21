@@ -45,6 +45,7 @@ export default function SubjectDialog({ subjectId, highlightCommentId, lang, use
             lang={lang}
             initialExpanded
             highlightCommentId={highlightCommentId ?? undefined}
+            readOnly={subject.status === "archived" || subject.status === "hidden"}
           />
         )}
       </DialogContent>

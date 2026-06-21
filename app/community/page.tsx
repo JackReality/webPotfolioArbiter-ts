@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { t } from "@/lib/i18n";
 import * as ForumSubjectService from "@/services/ForumSubjectService";
 import * as ForumCommentService from "@/services/ForumCommentService";
+import * as UserService from "@/services/UserService";
 import ForumView from "@/components/forum/ForumView";
 
 export default async function CommunityPage() {
@@ -9,13 +10,22 @@ export default async function CommunityPage() {
   const lang = session.language ?? "fr";
   const isMod = session.role === "admin" || session.role === "moderator";
 
-  const [subjects, lastDate] = await Promise.all([
+  const [subjects, lastDateWithPosts, user] = await Promise.all([
     ForumSubjectService.getAll(),
     ForumCommentService.getLastDateWithPosts(),
+    UserService.getById(session.id!),
   ]);
+
+  // Spec : utiliser forum_last_read_date si non null, sinon dernière date avec des posts
+  const initialDate = user?.forumLastReadDate
+    ? user.forumLastReadDate.toISOString().split("T")[0]
+    : lastDateWithPosts instanceof Date
+    ? lastDateWithPosts.toISOString().split("T")[0]
+    : null;
 
   const subjectsData = subjects.map((s) => ({
     ...s,
+    displayName: s.displayName,
     expiresAt: s.expiresAt?.toISOString() ?? null,
     createdAt: s.createdAt.toISOString(),
     updatedAt: s.updatedAt?.toISOString() ?? null,
@@ -28,7 +38,7 @@ export default async function CommunityPage() {
       </div>
       <ForumView
         subjects={subjectsData}
-        lastDate={lastDate instanceof Date ? lastDate.toISOString().split("T")[0] : null}
+        lastDate={initialDate}
         lang={lang}
         userId={session.id ?? 0}
         userRole={session.role ?? "subscriber"}

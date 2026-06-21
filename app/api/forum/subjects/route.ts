@@ -51,8 +51,9 @@ export async function POST(req: NextRequest) {
 
     const expiresAt =
       ["admin", "moderator"].includes(user.role) ? null : (user.axsCommunityExpire ?? null);
+    const isStaff = session.role === "admin" || session.role === "moderator";
 
-    const id = await ForumSubjectService.add(session.id, type, title, content, expiresAt);
+    const id = await ForumSubjectService.add(session.id, session.displayName ?? "", type, title, content, expiresAt, isStaff);
     return NextResponse.json({ id });
   } catch (e) {
     if (e instanceof AppError) return NextResponse.json({ error: e.code }, { status: 400 });

@@ -54,8 +54,9 @@ export default async function NavMenu() {
 
           {isLoggedIn ? (
             <div className="flex items-center gap-3">
-              <Link href="/subscriber/profile" title={session.displayName} className="text-muted-foreground hover:text-foreground transition-colors">
-                <UserCircle className="h-7 w-7" />
+              <Link href="/subscriber/profile" className="flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors">
+                <UserCircle className="h-6 w-6" />
+                <span className="text-xs leading-none mt-0.5">{session.displayName}</span>
               </Link>
               <a href="/api/auth/logout" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("nav.logout", lang)}

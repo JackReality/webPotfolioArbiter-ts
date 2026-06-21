@@ -2,6 +2,11 @@ import prisma from "@/lib/prisma";
 import type { ForumSubject } from "@prisma/client";
 
 export async function getAll() {
+  const now = new Date();
+  await prisma.forumSubject.updateMany({
+    where: { status: "open", expiresAt: { lt: now } },
+    data: { status: "archived", updatedAt: now },
+  });
   return prisma.forumSubject.findMany({
     where: { status: { notIn: ["archived", "hidden"] } },
     orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
@@ -40,13 +45,15 @@ export async function getByIdWithCount(id: number) {
 
 export async function add(
   userId: number,
+  displayName: string,
   type: string,
   title: string,
   content: string,
-  expiresAt: Date | null
+  expiresAt: Date | null,
+  isStaff: boolean
 ): Promise<number> {
   const subject = await prisma.forumSubject.create({
-    data: { userId, type, title, content, expiresAt },
+    data: { userId, displayName, type, title, content, expiresAt, isStaff },
   });
   return subject.id;
 }
