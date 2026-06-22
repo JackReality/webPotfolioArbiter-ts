@@ -132,7 +132,17 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
   const [error, setError] = useState("");
 
   const picto = TYPE_PICTO[subject.type] ?? "📝";
-  const isClosed = subject.status === "closed" || subject.status === "archived";
+  const isArchived = subject.status === "archived";
+  const [canReactivate, setCanReactivate] = useState(false);
+  useEffect(() => {
+    if (isArchived && subject.updatedAt) {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      setCanReactivate(new Date(subject.updatedAt) > oneMonthAgo);
+    } else {
+      setCanReactivate(false);
+    }
+  }, [isArchived, subject.updatedAt]);
 
   async function loadComments() {
     setLoading(true);
@@ -247,7 +257,6 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
             <p className="font-semibold leading-tight">{subject.title}</p>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {subject.isPinned && <Badge variant="secondary">📌 {t("forum.pinned", lang)}</Badge>}
-              {subject.status === "closed" && <Badge variant="outline">{t("forum.closed", lang)}</Badge>}
               {subject.status === "hidden" && isMod && <Badge variant="destructive">🚫 {t("forum.hidden", lang)}</Badge>}
               <span className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">{subject.displayName}</span>
@@ -276,7 +285,7 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
                     <button onClick={() => setConfirmDeleteSubject(true)} className="text-xs text-muted-foreground hover:text-destructive transition-colors">🗑️</button>
                   )
                 )}
-                {isMod && subject.status === "archived" && (
+                {(isMod || isSubjectOwner) && canReactivate && (
                   <button
                     onClick={handleUnarchiveSubject}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -425,7 +434,7 @@ export default function SubjectCard({ subject, userId, userRole, displayName, is
             );
           })()}
 
-          {!isClosed && !readOnly && (
+          {!isArchived && !readOnly && (
             <div className="space-y-2 pt-2">
               {replyTo && (
                 <p className="text-xs text-muted-foreground">

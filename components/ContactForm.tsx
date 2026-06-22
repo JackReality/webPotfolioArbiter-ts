@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,8 +12,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export default function ContactForm({ lang }: { lang: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [trap, setTrap] = useState(""); // honeypot
+  const [trap, setTrap] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -24,7 +26,7 @@ export default function ContactForm({ lang }: { lang: string }) {
     const res = await fetch("/api/contact", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, message, trap }),
+      body: JSON.stringify({ name, email, subject, message, trap }),
     });
     const data = await res.json();
     setLoading(false);
@@ -36,14 +38,16 @@ export default function ContactForm({ lang }: { lang: string }) {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Contact</CardTitle>
-          <CardDescription>Envoyez-nous un message.</CardDescription>
+          <CardTitle>{t("contact.title", lang)}</CardTitle>
+          <CardDescription>{t("contact.description", lang)}</CardDescription>
         </CardHeader>
         <CardContent>
           {success ? (
-            <Alert>
-              <AlertDescription>Message envoyé ! Nous vous répondrons sous peu.</AlertDescription>
-            </Alert>
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <CheckCircle className="w-12 h-12 text-green-500" />
+              <p className="font-semibold text-lg">{t("contact.successTitle", lang)}</p>
+              <p className="text-sm text-muted-foreground">{t("contact.successDetail", lang)}</p>
+            </div>
           ) : (
             <>
               {error && (
@@ -52,7 +56,6 @@ export default function ContactForm({ lang }: { lang: string }) {
                 </Alert>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Honeypot invisible */}
                 <input
                   type="text"
                   value={trap}
@@ -63,7 +66,7 @@ export default function ContactForm({ lang }: { lang: string }) {
                   aria-hidden="true"
                 />
                 <div className="space-y-1">
-                  <Label>Nom</Label>
+                  <Label>{t("contact.name", lang)}</Label>
                   <Input value={name} onChange={e => setName(e.target.value)} required autoComplete="name" />
                 </div>
                 <div className="space-y-1">
@@ -71,7 +74,11 @@ export default function ContactForm({ lang }: { lang: string }) {
                   <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required autoComplete="email" />
                 </div>
                 <div className="space-y-1">
-                  <Label>Message</Label>
+                  <Label>{t("contact.subject", lang)}</Label>
+                  <Input value={subject} onChange={e => setSubject(e.target.value)} required maxLength={150} />
+                </div>
+                <div className="space-y-1">
+                  <Label>{t("contact.message", lang)}</Label>
                   <textarea
                     className="flex min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
                     value={message}
@@ -81,7 +88,7 @@ export default function ContactForm({ lang }: { lang: string }) {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "..." : "Envoyer"}
+                  {loading ? t("contact.sending", lang) : t("contact.send", lang)}
                 </Button>
               </form>
             </>

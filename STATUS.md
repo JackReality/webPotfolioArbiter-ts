@@ -11,14 +11,6 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 ## À FAIRE
 
-### Forum / Communauté
-
-#### Tâche 9 — Style visuel autres onglets
-- [ ] Répliquer dans **onglet Archives** (SubjectCard réutilisé — vérifier que les styles s'appliquent bien)
-
-#### Tâche 10 — Améliorations forum (reste)
-- [ ] Ajouter une image dans un commentaire ou un sujet (stockage + compression — à décider)
-
 ### PHASE 11 — Suite Stripe (post-lancement)
 - [ ] **Stripe dashboard** — Activer l'envoi automatique des reçus/factures par Stripe aux clients
 - [ ] **Stripe dashboard** — Vérifier la configuration TVA (activer si pas fait)
@@ -29,10 +21,41 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 ### PHASE 9 — Pages formation
 - [ ] `app/trainings/private/portfolio/page.tsx` — construire le vrai contenu (actuellement placeholder)
 
-### Divers
-- [ ] Améliorer contact : message envoyé avec un vu vert, champ Sujet dans le formulaire + subject du mail, i18n
-- [ ] Traduire toutes les pages (form contact non traduit)
-- [ ] **Agrandir texte des blocs accueil** — image de comparaison à fournir dans `jack-import/`
+---
+
+## Fait le 2026-06-22
+
+### Forum — Nettoyage et refactoring
+
+- [x] Suivi : message "Aucune publication antérieure" affiché si `prev = null` (flèche gauche désactivée)
+- [x] `ForumSearchService.ts` → renommé `ForumService.ts` (service cross-tables générique)
+- [x] `ForumSubjectService.getAll()` → renommé `getActive()` (retourne uniquement `status = open`)
+- [x] Suppression du statut `closed` — fermer un sujet = archiver directement
+  - Réactivation (`archived` → `open`) : owner + mod + admin, limite 1 mois après archivage
+  - Au-delà d'1 mois : bouton masqué, API refuse pour tout le monde
+  - `forum.md` mis à jour
+- [x] `ForumService.runAutoTasks()` extrait de `getActive()` — appelé depuis `community/page.tsx` (1 fois par visite, pas à chaque clic d'onglet)
+- [x] Périmètre Suivi corrigé : `open` uniquement — archivés et biffés exclus
+- [x] Recherche : biffés exclus pour tous (sujets + commentaires), même pour les mods
+
+### Contact — Améliorations
+- [x] Champ Sujet ajouté au formulaire → utilisé dans le subject du mail
+- [x] Succès : icône ✅ verte + titre + message (remplace l'Alert grise)
+- [x] i18n complète FR/EN/ES (aucun texte hardcodé)
+
+### Traductions — Pages restantes
+- [x] `access-denied/page.tsx` — traduit FR/EN/ES
+- [x] `not-found.tsx` — traduit (clés `common.notFound` existaient déjà)
+- [x] `stripe-error/page.tsx` — traduit FR/EN/ES
+- [x] `stripe-success/page.tsx` — traduit FR/EN/ES
+- [x] `subscriber/download/page.tsx` — traduit FR/EN/ES
+- [x] `subscriber/profile/page.tsx` + `ProfileForms.tsx` — traduit FR/EN/ES
+- [x] `NavMenu.tsx` — "Contact" traduit via `nav.contact`
+- [x] Pages admin (`/app/admin/`) : non traduites — usage interne uniquement (documenté dans `CLAUDE.md`)
+
+### Audit ERR_*
+- [x] `ERR_HAS_REPLIES` manquant dans les locales → ajouté FR/EN/ES
+- [x] Règle documentée dans `CLAUDE.md` : tout code ERR_* doit exister dans les 3 locales
 
 ---
 
@@ -68,15 +91,10 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 #### Tâche 10 ✅ — Améliorations forum
 - [x] `display_name VARCHAR(100)` sur `forum_subject` (snapshot auteur, cohérent avec commentaires)
 - [x] Header sujet : auteur (gras) · date création · modifié le X · expire le X (rouge si dépassée) · nb commentaires
-- [x] Auto-archivage : `getAll()` archive les sujets expirés (`expiresAt < NOW()`) avant de retourner la liste
 - [x] 🗑️ Archiver/Supprimer : owner OU mod, status `open` — service choisit DELETE (0 commentaire) ou archive
 - [x] 📂 Désarchiver : mod uniquement, picto dans Archives, recharge la liste après
-- [x] `SubjectDialog` : `readOnly` dynamique selon status (archived/hidden) — couvre tous les onglets
-- [x] Onglet Recherche : `ForumSearchService`, route `GET /api/forum/search`, `RechercheTab.tsx` vue 3 colonnes
-  - Critères : texte, auteur, destinataire, staff only, date début/fin (défaut 3 mois)
-  - Périmètre : open + closed + archived, jamais hidden (sauf mod)
+- [x] Onglet Recherche : `ForumService`, route `GET /api/forum/search`, `RechercheTab.tsx` vue 3 colonnes
 - [x] Ordre des onglets : Forum · Suivi · Pour moi · Recherche · Archives · Biffé
-- [x] Rechargement au clic d'onglet pour tous les onglets (Forum, Suivi, Pour moi, Archives, Biffé)
 
 ### Divers
 - [x] **Header site** — `displayName` affiché sous le picto `UserCircle` dans le bandeau (desktop)
@@ -93,12 +111,8 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 
 #### Dialogue "Voir le sujet" ✅
 - [x] `GET /api/forum/subjects/[id]` ajouté (retourne sujet avec `_count.comments`)
-- [x] `getByIdWithCount` ajouté dans `ForumSubjectService`
 - [x] `SubjectDialog.tsx` créé : largeur 75vw, fetch par ID à l'ouverture, réutilise `SubjectCard`
-- [x] `SubjectCard` : prop `initialExpanded` (expand auto dans le dialogue)
 - [x] `SubjectCard` : prop `highlightCommentId` — trait vert gauche + scroll auto vers le commentaire ciblé
-- [x] Highlight fonctionnel pour les commentaires de niveau 1 (réponses) également
-- [x] Fond épinglé ambre + surlignage vert : meilleure visibilité en dark mode
 
 #### Onglet Suivi — bouton 👁️
 - [x] Bouton 👁️ sur chaque sujet et chaque commentaire → ouvre `SubjectDialog` avec highlight
@@ -107,9 +121,6 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 #### Pictos et visuels
 - [x] Débiffér : 👁️ remplacé par ✅ — cohérence avec 👁️ = "voir"
 - [x] Commentaire biffé : texte en `text-red-400`
-
-#### Rafraîchissement
-- [x] Clic onglet Forum → `router.refresh()` · Suivi → `suiviKey++` · Biffé → `onRefreshList`
 
 ---
 
@@ -122,11 +133,9 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [x] `formatDate` → format manuel `getUTC*()` + noms de mois hardcodés
 - [x] Changement de langue inopérant → mise à jour de `session.language` iron-session
 - [x] Redirection après login → `/subscriber/myspace`
-- [x] BiffeTab : rendu conditionnel `{biffeRequested && <BiffeTab />}`
 
 #### Améliorations visuelles commentaires
 - [x] Ligne d'identité `text-xs text-muted-foreground`, nom en `font-medium`
-- [x] Pictos d'action : `gap-3`
 - [x] Séparateur entre commentaires niveau 0
 - [x] Liens cliquables dans le contenu
 - [x] Contenu tronqué à 3 lignes + flèche ▼/▲
@@ -144,19 +153,6 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [x] Formation gratuite : court-circuite Stripe, accès direct + session mise à jour
 - [x] `allow_repurchase BOOLEAN` dans `trainings` + formulaire admin
 - [x] Tests : achat → rôle `client`, `axs_community_expire` incrémenté, mail reçu ✅
-
----
-
-## Fait le 2026-06-17
-
-### PHASE 11 — Paiement Stripe
-
-- [x] Route `POST /api/stripe/checkout` + `GET /api/stripe/callback`
-- [x] `services/StripeService.ts` — `createCheckoutSession`
-- [x] `user_trainings` — colonnes `amount_ct` + `currency`
-- [x] `myspace/page.tsx` — tableau formations avec Prix
-- [x] `admin/users` — bouton "Achats" → dialog Stripe
-- [x] Mail bienvenu envoyé si `confirmation_email_html` non vide
 
 ---
 

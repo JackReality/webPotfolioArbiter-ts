@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import * as ForumSearchService from "@/services/ForumSearchService";
+import * as ForumService from "@/services/ForumService";
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,7 +8,6 @@ export async function GET(req: NextRequest) {
     if (!session.id || !session.communityAccess)
       return NextResponse.json({ error: "ERR_UNAUTHORIZED" }, { status: 401 });
 
-    const isMod = session.role === "admin" || session.role === "moderator";
     const { searchParams } = req.nextUrl;
 
     const q = searchParams.get("q") ?? undefined;
@@ -24,7 +23,7 @@ export async function GET(req: NextRequest) {
     const dateTo = toParam ? new Date(toParam) : new Date();
     dateTo.setHours(23, 59, 59, 999);
 
-    const results = await ForumSearchService.search({ query: q, dateFrom, dateTo, author, addressee, staffOnly, includeHidden: isMod });
+    const results = await ForumService.search({ query: q, dateFrom, dateTo, author, addressee, staffOnly });
     return NextResponse.json(results);
   } catch (e) {
     console.error("[forum/search GET]", e);

@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { t } from "@/lib/i18n";
 import * as ForumSubjectService from "@/services/ForumSubjectService";
 import * as ForumCommentService from "@/services/ForumCommentService";
+import * as ForumService from "@/services/ForumService";
 import * as UserService from "@/services/UserService";
 import ForumView from "@/components/forum/ForumView";
 
@@ -10,8 +11,10 @@ export default async function CommunityPage() {
   const lang = session.language ?? "fr";
   const isMod = session.role === "admin" || session.role === "moderator";
 
+  await ForumService.runAutoTasks();
+
   const [subjects, lastDateWithPosts, user] = await Promise.all([
-    ForumSubjectService.getAll(),
+    ForumSubjectService.getActive(),
     ForumCommentService.getLastDateWithPosts(),
     UserService.getById(session.id!),
   ]);

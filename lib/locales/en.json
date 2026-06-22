@@ -10,7 +10,8 @@
     "profile": "My profile",
     "copySheet": "Copy sheet",
     "mySpace": "My Space",
-    "clientArea": "Client Area"
+    "clientArea": "Client Area",
+    "contact": "Contact"
   },
   "hero": {
     "overline": "The compass for your investments",
@@ -304,7 +305,6 @@
     "comments": "comments",
     "comment": "comment",
     "pinned": "Pinned",
-    "closed": "Closed",
     "hidden": "Hidden",
     "archived": "Archived",
     "reply": "Reply",
@@ -325,6 +325,7 @@
     "cancel": "Cancel",
     "noPostsThisDay": "No posts on this day.",
     "noPostsSince": "No posts since this date.",
+    "noPriorPosts": "No prior posts.",
     "today": "Today",
     "typeQuestion": "Question",
     "typeShare": "Share",
@@ -344,11 +345,63 @@
   "ERR_FORBIDDEN": "Action not allowed.",
   "ERR_INVALID_TYPE": "Invalid subject type.",
   "ERR_INVALID_ACTION": "Invalid action.",
-  "ERR_SUBJECT_CLOSED": "This subject is closed to new comments.",
+  "ERR_HAS_REPLIES": "This comment cannot be deleted because it has replies.",
+  "ERR_SUBJECT_CLOSED": "This subject is archived, comments are closed.",
+  "ERR_REACTIVATION_EXPIRED": "This subject has been archived for more than a month and can no longer be reactivated.",
   "ERR_EDIT_WINDOW_EXPIRED": "Editing is not possible after 1 hour of publication.",
   "ERR_TRAINING_NOT_FOUND": "Training not found.",
   "ERR_STRIPE_NOT_CONFIGURED": "This training is not yet available for purchase.",
   "ERR_ALREADY_PURCHASED": "You already own this training.",
+  "accessDenied": {
+    "title": "Access denied",
+    "message": "You don't have the rights to access this page."
+  },
+  "stripeError": {
+    "title": "Payment not confirmed",
+    "message": "The payment could not be validated. No amount has been charged.",
+    "backToCatalog": "Back to catalog",
+    "contactUs": "Contact us"
+  },
+  "stripeSuccess": {
+    "title": "Payment confirmed",
+    "accessNow": "You now have access to the training",
+    "goToTraining": "Go to training",
+    "registered": "Your purchase has been registered.",
+    "mySpace": "My space"
+  },
+  "download": {
+    "title": "Download resources",
+    "cardTitle": "Member resources",
+    "description": "Access files and resources reserved for members.",
+    "openSheets": "Open Google Sheets"
+  },
+  "profile": {
+    "title": "My profile",
+    "displayName": "Display name",
+    "name": "Name",
+    "language": "Language",
+    "email": "Email address",
+    "currentEmail": "Current email",
+    "newEmail": "New email",
+    "sendCode": "Send code",
+    "codeSentTo": "A code has been sent to",
+    "verificationCode": "Verification code",
+    "confirm": "Confirm",
+    "security": "Security",
+    "changePassword": "Change password",
+    "administration": "Administration"
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Send us a message, we'll get back to you shortly.",
+    "name": "Name",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending…",
+    "successTitle": "Message sent!",
+    "successDetail": "We'll get back to you as soon as possible."
+  },
   "ERR_PASSWORD_MISMATCH": "Passwords do not match.",
   "resetPassword": {
     "title": "Change password",
@@ -369,6 +422,9 @@
   },
   "common": {
     "loading": "Loading…",
+    "backHome": "Back to home",
+    "save": "Save",
+    "cancel": "Cancel",
     "notFound": {
       "title": "Page not found",
       "desc": "The page you're looking for doesn't exist or has been moved."

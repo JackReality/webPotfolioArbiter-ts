@@ -41,14 +41,20 @@ Exemple dans la vue inversée (onglet Suivi) :
 | Valeur | Visible par | Description |
 |---|---|---|
 | `open` | Tous | Actif, commentaires possibles |
-| `closed` | Tous | Fermé, plus de nouveaux commentaires |
 | `archived` | Tous | Figé, lecture seule, affiché dans les archives |
 | `hidden` | Admin / Moderator | Masqué (contenu jugé inapproprié), signalé par un picto 🚫 |
+
+> Le statut `closed` n'existe plus. Fermer un sujet = l'archiver directement.
 
 ### Règles de suppression / archivage
 - **Aucun commentaire** → suppression réelle (DELETE)
 - **Au moins un commentaire** → passage en `archived` (jamais supprimé)
 - Quand un sujet est archivé, tous ses commentaires le sont implicitement — pas de champ `archived` sur les commentaires
+
+### Réactivation (`archived` → `open`)
+- Possible pour : **owner**, **moderator**, **admin**
+- Limite : **1 mois après l'archivage** (`updated_at` du sujet)
+- Au-delà d'1 mois : bouton masqué, API refuse — personne ne peut réactiver, même admin
 
 ### Modification
 - Possible dans l'**heure suivant la publication** (`created_at + 1h`)
@@ -60,7 +66,7 @@ Exemple dans la vue inversée (onglet Suivi) :
 
 ### Expiration (`expires_at`)
 - Copie de `axs_community_expire` du créateur au moment de la création
-- Quand la date est dépassée → sujet automatiquement fermé (`closed`)
+- Quand la date est dépassée → sujet automatiquement archivé (`archived`)
 
 ---
 
@@ -167,9 +173,9 @@ Vue centrée sur une **date** pour suivre ce qui s'est passé depuis la dernièr
 | Créer un sujet | ❌ | ✅ | — | ✅ | ✅ |
 | Créer type `announcement` | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Modifier son sujet/commentaire (< 1h) | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Fermer son sujet | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Archiver son sujet | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Supprimer sujet (sans commentaires) | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Archiver sujet (avec commentaires) | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Réactiver sujet archivé (< 1 mois) | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Masquer (`hidden`) sujet/commentaire | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Épingler un sujet | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Épingler un commentaire | ❌ | ❌ | ❌ (owner sujet ✅) | ✅ | ✅ |
@@ -189,7 +195,7 @@ user_id          INT UNSIGNED    FK users.id
 type             ENUM('question','share','request','bug','announcement')
 title            VARCHAR(255)
 content          TEXT
-status           ENUM('open','closed','archived','hidden')   DEFAULT 'open'
+status           ENUM('open','archived','hidden')   DEFAULT 'open'
 is_pinned        BOOLEAN                                     DEFAULT false
 expires_at       DATETIME NULL
 created_at       DATETIME

@@ -9,25 +9,26 @@ function err(code: string, status = 400) { return NextResponse.json({ error: cod
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, email, message, trap } = body;
+  const { name, email, subject, message, trap } = body;
 
   // Honeypot rempli = bot silencieux
   if (trap) return ok();
 
-  if (!name || !email || !message) return err("ERR_FIELDS_REQUIRED");
+  if (!name || !email || !subject || !message) return err("ERR_FIELDS_REQUIRED");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return err("ERR_INVALID_EMAIL");
 
   try {
     check();
     const to = process.env.CONTACT_EMAIL ?? "contact@realityexplorer.com";
-    const subject = `[Contact] ${name.slice(0, 100)}`;
+    const emailSubject = `[Contact] ${escHtml(subject).slice(0, 150)}`;
     const html = `
       <p><strong>Nom :</strong> ${escHtml(name)}</p>
       <p><strong>Email :</strong> ${escHtml(email)}</p>
+      <p><strong>Sujet :</strong> ${escHtml(subject)}</p>
       <p><strong>Message :</strong></p>
       <p>${escHtml(message).replace(/\n/g, "<br/>")}</p>
     `;
-    await sendEmail(to, subject, html, email);
+    await sendEmail(to, emailSubject, html, email);
     record();
     return ok();
   } catch (e) {

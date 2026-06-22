@@ -113,6 +113,7 @@ export async function getForMe(userId: number) {
     where: {
       destUserId: userId,
       status: "visible",
+      subject: { status: { not: "hidden" } },
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -122,7 +123,7 @@ export async function getForMe(userId: number) {
   });
 }
 
-export async function getSince(date: Date, includeHidden = false) {
+export async function getSince(date: Date) {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
 
@@ -130,14 +131,15 @@ export async function getSince(date: Date, includeHidden = false) {
     prisma.forumSubject.findMany({
       where: {
         createdAt: { gte: start },
-        ...(includeHidden ? {} : { status: { not: "hidden" } }),
+        status: "open",
       },
       orderBy: { createdAt: "asc" },
     }),
     prisma.forumComment.findMany({
       where: {
         createdAt: { gte: start },
-        ...(includeHidden ? {} : { status: "visible" }),
+        status: "visible",
+        subject: { status: { in: ["open", "closed"] } },
       },
       orderBy: { createdAt: "asc" },
       include: {

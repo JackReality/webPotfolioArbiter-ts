@@ -18,7 +18,7 @@ export default async function NavMenu() {
       ? { href: "/subscriber/myspace", label: t("nav.mySpace", lang) }
       : { href: "/subscriber/download", label: t("nav.download", lang) },
     { href: "/catalog", label: t("nav.formation", lang) },
-    { href: "/contact", label: "Contact" },
+    { href: "/contact", label: t("nav.contact", lang) },
   ];
 
   return (

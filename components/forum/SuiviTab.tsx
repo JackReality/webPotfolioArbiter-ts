@@ -121,12 +121,8 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
     | { kind: "comment"; item: CommentWithContext };
 
   const feed: FeedItem[] = [
-    ...data.subjects
-      .filter(s => isMod || s.status !== "hidden")
-      .map(s => ({ kind: "subject" as const, item: s })),
-    ...data.comments
-      .filter(c => isMod || c.status !== "hidden")
-      .map(c => ({ kind: "comment" as const, item: c })),
+    ...data.subjects.map(s => ({ kind: "subject" as const, item: s })),
+    ...data.comments.map(c => ({ kind: "comment" as const, item: c })),
   ].sort((a, b) => a.item.createdAt.localeCompare(b.item.createdAt));
 
   return (
@@ -160,6 +156,9 @@ export default function SuiviTab({ initialDate, suiviKey, lang, userId, userRole
           >
             {t("forum.today", lang)}
           </button>
+        )}
+        {!data.prev && (
+          <p className="text-xs text-muted-foreground">{t("forum.noPriorPosts", lang)}</p>
         )}
       </div>
 

@@ -8,12 +8,11 @@ export async function GET(req: NextRequest) {
     if (!session.id || !session.communityAccess)
       return NextResponse.json({ error: "ERR_UNAUTHORIZED" }, { status: 401 });
 
-    const isMod = session.role === "admin" || session.role === "moderator";
     const dateParam = req.nextUrl.searchParams.get("date");
     const date = dateParam ? new Date(dateParam) : new Date();
 
     const [data, prev, next] = await Promise.all([
-      ForumCommentService.getSince(date, isMod),
+      ForumCommentService.getSince(date),
       ForumCommentService.getPrevDate(date),
       ForumCommentService.getNextDate(date),
     ]);

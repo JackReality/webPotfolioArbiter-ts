@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       if (!isMod) return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
       return NextResponse.json(await ForumSubjectService.getHidden());
     }
-    return NextResponse.json(await ForumSubjectService.getAll());
+    return NextResponse.json(await ForumSubjectService.getActive());
   } catch (e) {
     console.error("[forum/subjects GET]", e);
     return NextResponse.json({ error: "ERR_SYSTEM" }, { status: 500 });

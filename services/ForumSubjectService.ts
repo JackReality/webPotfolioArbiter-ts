@@ -1,14 +1,9 @@
 import prisma from "@/lib/prisma";
 import type { ForumSubject } from "@prisma/client";
 
-export async function getAll() {
-  const now = new Date();
-  await prisma.forumSubject.updateMany({
-    where: { status: "open", expiresAt: { lt: now } },
-    data: { status: "archived", updatedAt: now },
-  });
+export async function getActive() {
   return prisma.forumSubject.findMany({
-    where: { status: { notIn: ["archived", "hidden"] } },
+    where: { status: "open" },
     orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     include: { _count: { select: { comments: true } } },
   });

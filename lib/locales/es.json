@@ -10,7 +10,8 @@
     "profile": "Mi perfil",
     "copySheet": "Copiar hoja",
     "mySpace": "Mi Espacio",
-    "clientArea": "Área de Cliente"
+    "clientArea": "Área de Cliente",
+    "contact": "Contacto"
   },
   "hero": {
     "overline": "La brújula de tus inversiones",
@@ -304,7 +305,6 @@
     "comments": "comentarios",
     "comment": "comentario",
     "pinned": "Fijado",
-    "closed": "Cerrado",
     "hidden": "Oculto",
     "archived": "Archivado",
     "reply": "Responder",
@@ -325,6 +325,7 @@
     "cancel": "Cancelar",
     "noPostsThisDay": "Sin publicaciones este día.",
     "noPostsSince": "Sin publicaciones desde esta fecha.",
+    "noPriorPosts": "Sin publicaciones anteriores.",
     "today": "Hoy",
     "typeQuestion": "Pregunta",
     "typeShare": "Testimonio",
@@ -344,11 +345,63 @@
   "ERR_FORBIDDEN": "Acción no autorizada.",
   "ERR_INVALID_TYPE": "Tipo de tema inválido.",
   "ERR_INVALID_ACTION": "Acción inválida.",
-  "ERR_SUBJECT_CLOSED": "Este tema está cerrado a nuevos comentarios.",
+  "ERR_HAS_REPLIES": "Este comentario no puede eliminarse porque tiene respuestas.",
+  "ERR_SUBJECT_CLOSED": "Este tema está archivado, los comentarios están cerrados.",
+  "ERR_REACTIVATION_EXPIRED": "Este tema lleva más de un mes archivado y ya no puede reactivarse.",
   "ERR_EDIT_WINDOW_EXPIRED": "La edición no es posible después de 1 hora de publicación.",
   "ERR_TRAINING_NOT_FOUND": "Formación no encontrada.",
   "ERR_STRIPE_NOT_CONFIGURED": "Esta formación aún no está disponible para su compra.",
   "ERR_ALREADY_PURCHASED": "Ya tienes esta formación.",
+  "accessDenied": {
+    "title": "Acceso denegado",
+    "message": "No tienes los derechos necesarios para acceder a esta página."
+  },
+  "stripeError": {
+    "title": "Pago no confirmado",
+    "message": "El pago no pudo ser validado. No se ha cobrado ningún importe.",
+    "backToCatalog": "Volver al catálogo",
+    "contactUs": "Contáctanos"
+  },
+  "stripeSuccess": {
+    "title": "Pago confirmado",
+    "accessNow": "Ahora tienes acceso a la formación",
+    "goToTraining": "Ir a la formación",
+    "registered": "Tu compra ha sido registrada.",
+    "mySpace": "Mi espacio"
+  },
+  "download": {
+    "title": "Descargar recursos",
+    "cardTitle": "Recursos para miembros",
+    "description": "Accede a los archivos y recursos reservados para miembros.",
+    "openSheets": "Abrir Google Sheets"
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "displayName": "Nombre mostrado",
+    "name": "Nombre",
+    "language": "Idioma",
+    "email": "Dirección de email",
+    "currentEmail": "Email actual",
+    "newEmail": "Nuevo email",
+    "sendCode": "Enviar código",
+    "codeSentTo": "Se ha enviado un código a",
+    "verificationCode": "Código de verificación",
+    "confirm": "Confirmar",
+    "security": "Seguridad",
+    "changePassword": "Cambiar contraseña",
+    "administration": "Administración"
+  },
+  "contact": {
+    "title": "Contacto",
+    "description": "Envíanos un mensaje, te responderemos en breve.",
+    "name": "Nombre",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "successTitle": "¡Mensaje enviado!",
+    "successDetail": "Te responderemos lo antes posible."
+  },
   "ERR_PASSWORD_MISMATCH": "Las contraseñas no coinciden.",
   "resetPassword": {
     "title": "Cambiar contraseña",
@@ -369,6 +422,9 @@
   },
   "common": {
     "loading": "Cargando…",
+    "backHome": "Volver al inicio",
+    "save": "Guardar",
+    "cancel": "Cancelar",
     "notFound": {
       "title": "Página no encontrada",
       "desc": "La página que buscas no existe o ha sido movida."

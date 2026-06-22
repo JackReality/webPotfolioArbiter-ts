@@ -99,11 +99,11 @@ export default function ProfileForms({ displayName, email, language, role, lang 
       {/* Nom affiché */}
       <Card>
         <CardHeader>
-          <CardTitle>Nom affiché</CardTitle>
+          <CardTitle>{t("profile.displayName", lang)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-1">
-            <Label htmlFor="display-name">Nom</Label>
+            <Label htmlFor="display-name">{t("profile.name", lang)}</Label>
             <Input
               id="display-name"
               value={name}
@@ -111,14 +111,14 @@ export default function ProfileForms({ displayName, email, language, role, lang 
             />
           </div>
           {nameError && <p className="text-sm text-destructive">{nameError}</p>}
-          <Button onClick={handleUpdateName}>Enregistrer</Button>
+          <Button onClick={handleUpdateName}>{t("common.save", lang)}</Button>
         </CardContent>
       </Card>
 
       {/* Langue */}
       <Card>
         <CardHeader>
-          <CardTitle>Langue</CardTitle>
+          <CardTitle>{t("profile.language", lang)}</CardTitle>
         </CardHeader>
         <CardContent>
           <Select defaultValue={language ?? "fr"} onValueChange={(v) => v && handleSetLanguage(v)}>
@@ -137,14 +137,14 @@ export default function ProfileForms({ displayName, email, language, role, lang 
       {/* Changement d'email */}
       <Card>
         <CardHeader>
-          <CardTitle>Adresse email</CardTitle>
+          <CardTitle>{t("profile.email", lang)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-muted-foreground">Email actuel : {email}</p>
+          <p className="text-sm text-muted-foreground">{t("profile.currentEmail", lang)} : {email}</p>
           {emailStep === "idle" ? (
             <>
               <div className="space-y-1">
-                <Label htmlFor="new-email">Nouvel email</Label>
+                <Label htmlFor="new-email">{t("profile.newEmail", lang)}</Label>
                 <Input
                   id="new-email"
                   type="email"
@@ -153,13 +153,13 @@ export default function ProfileForms({ displayName, email, language, role, lang 
                 />
               </div>
               {emailError && <p className="text-sm text-destructive">{emailError}</p>}
-              <Button onClick={handleRequestEmailChange}>Envoyer le code</Button>
+              <Button onClick={handleRequestEmailChange}>{t("profile.sendCode", lang)}</Button>
             </>
           ) : (
             <>
-              <p className="text-sm">Un code a été envoyé à {newEmail}.</p>
+              <p className="text-sm">{t("profile.codeSentTo", lang)} {newEmail}.</p>
               <div className="space-y-1">
-                <Label htmlFor="otp">Code de vérification</Label>
+                <Label htmlFor="otp">{t("profile.verificationCode", lang)}</Label>
                 <Input
                   id="otp"
                   value={otp}
@@ -169,12 +169,12 @@ export default function ProfileForms({ displayName, email, language, role, lang 
               </div>
               {emailError && <p className="text-sm text-destructive">{emailError}</p>}
               <div className="flex gap-2">
-                <Button onClick={handleConfirmEmailChange}>Confirmer</Button>
+                <Button onClick={handleConfirmEmailChange}>{t("profile.confirm", lang)}</Button>
                 <Button
                   variant="outline"
                   onClick={() => { setEmailStep("idle"); setEmailError(""); setOtp(""); }}
                 >
-                  Annuler
+                  {t("common.cancel", lang)}
                 </Button>
               </div>
             </>
@@ -182,18 +182,18 @@ export default function ProfileForms({ displayName, email, language, role, lang 
         </CardContent>
       </Card>
 
-      {/* Liens */}
+      {/* Sécurité */}
       <Card>
         <CardHeader>
-          <CardTitle>Sécurité</CardTitle>
+          <CardTitle>{t("profile.security", lang)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <Link href="/subscriber/reset-password" className={buttonVariants({ variant: "outline", className: "w-full" })}>
-            Changer le mot de passe
+            {t("profile.changePassword", lang)}
           </Link>
           {role === "admin" && (
             <Link href="/admin/dashboard" className={buttonVariants({ variant: "outline", className: "w-full" })}>
-              Administration
+              {t("profile.administration", lang)}
             </Link>
           )}
         </CardContent>

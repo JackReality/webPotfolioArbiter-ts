@@ -34,14 +34,16 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const subjectId = Number(id);
     const subject = await ForumSubjectService.getById(subjectId);
     if (!subject) return NextResponse.json({ error: "ERR_NOT_FOUND" }, { status: 404 });
-    if (subject.status === "closed" || subject.status === "archived")
+    if (subject.status === "archived")
       return NextResponse.json({ error: "ERR_SUBJECT_CLOSED" }, { status: 403 });
 
     const { content, forumCommentId } = await req.json();
     if (!content) return NextResponse.json({ error: "ERR_FIELDS_REQUIRED" }, { status: 400 });
 
+    const isStaff = session.role === "admin" || session.role === "moderator";
     let parentId: number | null = null;
     let addressedTo: string | null = null;
+    let destUserId: number | null = null;
 
     if (forumCommentId) {
       const target = await ForumCommentService.getBySubject(subjectId).then((cs) =>
@@ -51,6 +53,11 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       // Flattening : si le commentaire cible est déjà niveau 1, on remonte au parent
       parentId = target.forumCommentId ?? target.id;
       addressedTo = target.displayName;
+      // Notifier l'auteur du commentaire ciblé (pas soi-même)
+      if (target.userId !== session.id) destUserId = target.userId;
+    } else {
+      // Commentaire niveau 0 : notifier le propriétaire du sujet (pas soi-même)
+      if (subject.userId !== session.id) destUserId = subject.userId;
     }
 
     const commentId = await ForumCommentService.add(
@@ -59,7 +66,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       session.id,
       session.displayName ?? "",
       addressedTo,
-      content
+      content,
+      destUserId,
+      isStaff
     );
     return NextResponse.json({ id: commentId });
   } catch (e) {

@@ -56,10 +56,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       if (!title || !content)
         return NextResponse.json({ error: "ERR_FIELDS_REQUIRED" }, { status: 400 });
       await ForumSubjectService.update({ id: subjectId, title, content, updatedAt: new Date() });
-    } else if (action === "close" || action === "archive") {
+    } else if (action === "archive") {
       if (!isOwner && !isMod(role))
         return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
-      await ForumSubjectService.setStatus(subjectId, action === "close" ? "closed" : "archived");
+      await ForumSubjectService.setStatus(subjectId, "archived");
     } else if (action === "pin" || action === "unpin") {
       if (!isMod(role))
         return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
@@ -69,8 +69,12 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
       await ForumSubjectService.setStatus(subjectId, action === "hide" ? "hidden" : "open");
     } else if (action === "open") {
-      if (!isMod(role))
+      if (!isOwner && !isMod(role))
         return NextResponse.json({ error: "ERR_FORBIDDEN" }, { status: 403 });
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      if (!subject.updatedAt || subject.updatedAt < oneMonthAgo)
+        return NextResponse.json({ error: "ERR_REACTIVATION_EXPIRED" }, { status: 403 });
       await ForumSubjectService.setStatus(subjectId, "open");
     } else {
       return NextResponse.json({ error: "ERR_INVALID_ACTION" }, { status: 400 });
