@@ -1,5 +1,5 @@
 ---
-description: Lancer le serveur de développement Next.js
+description: Lancer le serveur de développement Nuxt
 ---
 
 # Lancer l'application
@@ -17,7 +17,7 @@ npm run dev
 
 ## Notes
 
-- Le serveur utilise Turbopack (`next dev --turbopack`)
-- Prêt en moins de 2 secondes quand affiché "✓ Ready"
+- Le serveur utilise Nuxt (Nitro en arrière-plan)
+- Prêt quand "Nuxt ready" est affiché dans le terminal
 - Base de données MySQL requise sur 127.0.0.1:3306 (voir DATABASE_URL dans `.env`)
 - Pour tester les pages protégées, créer un compte sur `/register` puis se connecter sur `/login`
