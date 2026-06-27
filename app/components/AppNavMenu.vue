@@ -3,7 +3,7 @@ import type { SessionData } from '~/server/utils/session'
 
 const { t } = useI18n()
 const route = useRoute()
-const { data: session } = useFetch<SessionData | null>('/api/auth/me')
+const session = useState<SessionData | null | undefined>('app-session')
 const langCookie = useCookie('language')
 
 const menuOpen = ref(false)

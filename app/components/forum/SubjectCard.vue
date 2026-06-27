@@ -200,7 +200,7 @@ const cardClass = computed(() => {
                 · {{ forumFormatDate(subject.createdAt, lang) }}
                 <template v-if="subject.updatedAt"> · <em>{{ t('forum.modifiedOn') }} {{ forumFormatDate(subject.updatedAt, lang) }}</em></template>
                 <template v-if="subject.expiresAt">
-                  · <span :class="new Date(subject.expiresAt) < new Date() ? 'text-destructive' : ''">{{ t('forum.expiresOn') }} {{ forumFormatDate(subject.expiresAt, lang) }}</span>
+                  · <span :class="new Date(subject.expiresAt) < new Date() ? 'text-red-500' : ''">{{ t('forum.expiresOn') }} {{ forumFormatDate(subject.expiresAt, lang) }}</span>
                 </template>
                 · {{ subject._count.comments }} {{ t(subject._count.comments === 1 ? 'forum.comment' : 'forum.comments') }}
               </span>
@@ -211,7 +211,7 @@ const cardClass = computed(() => {
                     <button class="text-red-500 hover:text-red-600 transition-colors text-xs" @click="confirmDeleteSubject = false">✖</button>
                     <button class="text-green-500 hover:text-green-600 transition-colors text-xs" @click="handleDeleteSubject">✔</button>
                   </template>
-                  <button v-else class="text-xs text-muted-foreground hover:text-destructive transition-colors" @click="confirmDeleteSubject = true">🗑️</button>
+                  <button v-else class="text-xs text-muted-foreground hover:text-red-500 transition-colors" @click="confirmDeleteSubject = true">🗑️</button>
                 </template>
                 <button
                   v-if="(isMod || isSubjectOwner) && canReactivate"

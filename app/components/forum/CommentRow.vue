@@ -102,7 +102,7 @@ async function handleTogglePin() {
         <span v-if="isLevel1 && comment.addressedTo && parentComment" class="text-xs text-muted-foreground">
           (→ {{ comment.addressedTo }} · {{ forumFormatDate(parentComment.createdAt, lang) }})
         </span>
-        <span v-if="isHidden && isMod" class="text-xs text-destructive">🚫</span>
+        <span v-if="isHidden && isMod" class="text-xs text-red-500">🚫</span>
         <div class="flex gap-3 items-center">
           <button v-if="!readOnly" class="text-xs text-muted-foreground hover:text-foreground transition-colors" @click="emit('like', comment.id)">
             {{ liked ? '❤️' : '🤍' }}{{ likes.length > 0 ? ` ${likes.length}` : '' }}
@@ -118,7 +118,7 @@ async function handleTogglePin() {
               <button class="text-red-500 hover:text-red-600 transition-colors text-xs" @click="confirmDelete = false">✖</button>
               <button class="text-green-500 hover:text-green-600 transition-colors text-xs" @click="handleDelete">✔</button>
             </template>
-            <button v-else class="text-xs text-muted-foreground hover:text-destructive transition-colors" @click="confirmDelete = true">🗑️</button>
+            <button v-else class="text-xs text-muted-foreground hover:text-red-500 transition-colors" @click="confirmDelete = true">🗑️</button>
           </template>
           <button v-if="isMod && !readOnly && !isLevel1" class="text-xs text-muted-foreground hover:text-foreground transition-colors" @click="handleTogglePin">
             {{ comment.isPinned ? '📌' : '📍' }}

@@ -31,7 +31,7 @@ export function checkCode(email: string, input: string): void {
 
   if (entry.code !== input.trim()) {
     const attempts = entry.attempts + 1;
-    if (attempts >= 5) {
+    if (attempts >= 3) {
       store.delete(email);
       throw new AppError("ERR_CODE_MAX_ATTEMPTS");
     }

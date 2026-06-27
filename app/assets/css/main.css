@@ -1,3 +1,64 @@
 @import "tailwindcss";
 @source "../../app/**/*.{vue,ts}";
 @import "@nuxt/ui";
+
+body {
+  background-color: #000000;
+}
+
+/* Fonds Nuxt UI — remplace le slate bleuté par du gris neutre foncé */
+:root {
+  --ui-bg:           #1e1e1e;
+  --ui-bg-muted:     #252525;
+  --ui-bg-elevated:  #2c2c2c;
+  --ui-bg-accented:  #333333;
+  --ui-border:       rgba(255, 255, 255, 0.18);
+  --ui-border-muted: rgba(255, 255, 255, 0.09);
+  --ui-text-muted:   #888888;
+  --ui-text-toned:   #aaaaaa;
+}
+
+/* Boutons — métal argent (légère teinte froide = argent réel) */
+button:not([disabled]),
+a[role="button"]:not([disabled]) {
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #d8dde4 40%,
+    #b0b8c4 100%
+  );
+  color: #0f0f0f;
+  border: 1px solid rgba(100, 110, 130, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 1px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.1s ease;
+}
+
+button:not([disabled]):hover,
+a[role="button"]:not([disabled]):hover {
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #e8ecf2 30%,
+    #c8d0dc 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 0 16px rgba(180, 200, 230, 0.7),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+button:not([disabled]):active,
+a[role="button"]:not([disabled]):active {
+  background: linear-gradient(180deg,
+    #9aa4b2 0%,
+    #c0c8d4 55%,
+    #dde2e8 100%
+  );
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
+}

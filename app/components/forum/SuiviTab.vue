@@ -113,7 +113,7 @@ const feed = computed(() => {
                     <span class="font-medium text-foreground">{{ entry.item.title }}</span>
                     <span>· {{ entry.item.displayName }}</span>
                     <span>· {{ forumFormatDate(entry.item.createdAt, lang) }}</span>
-                    <span v-if="entry.item.status === 'hidden' && isMod" class="text-destructive">🚫</span>
+                    <span v-if="entry.item.status === 'hidden' && isMod" class="text-red-500">🚫</span>
                     <button class="hover:text-foreground transition-colors" :title="t('forum.viewSubject')" @click="openSubjectId = entry.item.id; openCommentId = null">👁️</button>
                   </div>
                   <p class="text-xs mt-1 line-clamp-2 text-muted-foreground">{{ entry.item.content }}</p>
@@ -133,7 +133,7 @@ const feed = computed(() => {
                     <span class="font-medium text-foreground">{{ entry.item.displayName }}</span>
                     <span>· {{ forumFormatDate(entry.item.createdAt, lang) }}</span>
                     <span v-if="entry.item.forumCommentId !== null && entry.item.addressedTo">(→ {{ entry.item.addressedTo }})</span>
-                    <span v-if="entry.item.status === 'hidden' && isMod" class="text-destructive">🚫</span>
+                    <span v-if="entry.item.status === 'hidden' && isMod" class="text-red-500">🚫</span>
                     <span>{{ (entry.item.likes as number[]).includes(userId) ? '❤️' : '🤍' }}{{ entry.item.likes.length > 0 ? ` ${entry.item.likes.length}` : '' }}</span>
                     <button class="hover:text-foreground transition-colors" :title="t('forum.viewSubject')" @click="openSubjectId = entry.item.subject.id; openCommentId = entry.item.id">👁️</button>
                   </div>

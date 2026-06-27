@@ -29,7 +29,7 @@ async function handleSubmit() {
 
 <template>
   <div class="min-h-[80vh] flex items-center justify-center px-4">
-    <UCard class="w-full max-w-sm">
+    <UCard class="w-full max-w-lg">
       <template #header>
         <h2 class="text-base font-semibold">{{ t('contact.title') }}</h2>
         <p class="text-sm text-muted-foreground">{{ t('contact.description') }}</p>
@@ -54,19 +54,19 @@ async function handleSubmit() {
         />
 
         <UFormField :label="t('contact.name')">
-          <UInput v-model="name" autocomplete="name" required />
+          <UInput v-model="name" class="w-full" autocomplete="name" required />
         </UFormField>
 
         <UFormField :label="t('auth.email')">
-          <UInput v-model="email" type="email" autocomplete="email" required />
+          <UInput v-model="email" class="w-full" type="email" autocomplete="email" required />
         </UFormField>
 
         <UFormField :label="t('contact.subject')">
-          <UInput v-model="subject" :maxlength="150" required />
+          <UInput v-model="subject" class="w-full" :maxlength="150" required />
         </UFormField>
 
         <UFormField :label="t('contact.message')">
-          <UTextarea v-model="message" :rows="5" required />
+          <UTextarea v-model="message" class="w-full" :rows="5" required />
         </UFormField>
 
         <UButton type="submit" class="w-full" :loading="loading" :disabled="loading">

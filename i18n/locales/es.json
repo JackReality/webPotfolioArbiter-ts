@@ -459,6 +459,7 @@
   "ERR_SYSTEM": "Se ha producido un error inesperado. Por favor, inténtalo de nuevo.",
   "ERR_FIELDS_REQUIRED": "Todos los campos son obligatorios.",
   "ERR_INVALID_EMAIL": "Dirección de correo electrónico no válida.",
+  "ERR_EMAIL_INVALID": "Dirección de correo inválida.",
   "ERR_EMAIL_TAKEN": "Esta dirección de correo ya está en uso.",
   "ERR_INVALID_CREDENTIALS": "Correo electrónico o contraseña incorrectos.",
   "ERR_INVALID_LANG": "Idioma no compatible.",

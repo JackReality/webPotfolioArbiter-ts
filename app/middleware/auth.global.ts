@@ -13,6 +13,13 @@ const ROUTE_ROLES: [string, string[]][] = [
 ]
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  const { $i18n } = useNuxtApp()
+  const langCookie = useCookie('language')
+  const lang = langCookie.value
+  if (lang && ['fr', 'en', 'es'].includes(lang) && lang !== $i18n.locale.value) {
+    await $i18n.setLocale(lang)
+  }
+
   const sessionState = useState<SessionData | null | undefined>('app-session', () => undefined)
 
   if (sessionState.value === undefined) {

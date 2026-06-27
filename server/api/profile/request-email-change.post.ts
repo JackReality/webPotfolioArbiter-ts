@@ -13,6 +13,7 @@ export default defineEventHandler(async (event) => {
   try {
     const { newEmail } = await readBody(event)
     if (!newEmail?.trim()) throw new AppError('ERR_FIELDS_REQUIRED')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) throw new AppError('ERR_EMAIL_INVALID')
 
     if (await UserService.emailExists(newEmail)) throw new AppError('ERR_EMAIL_TAKEN')
 

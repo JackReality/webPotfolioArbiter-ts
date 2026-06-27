@@ -2,18 +2,15 @@
 
 Règle : 7 sections maximum. Section 1 = À faire. Sections 2-7 (Archive) = Fait le YYYY-MM-DD (la plus ancienne est supprimée quand une nouvelle est ajoutée).
 La demande utilisateur: "Archive" déplace toutes les tâches faites du jour dans les chapitres d'archive
+La demande utilisateu: "Sauvegarde" -> Fait un  Git en local + Github https://github.com/JackReality/webPotfolioArbiter-ts
 Hirérachie: Projet > Tâches > étapes. Chaque tâches est analysée, puis on liste les étapes
 Les tâches sont regroupé dans des projets ou le projet Divers si c'est une simple tâche
 
-Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArbiter-ts
+
 
 ---
 
 ## À FAIRE
-
-### DÉBOGAGE NUXT — Bugs repérés au premier lancement
-
-- [ ] À documenter lors de la prochaine session (bugs visuels et fonctionnels vus sur le site)
 
 ### PHASE 9 — Pages formation
 
@@ -26,6 +23,23 @@ Sauvegarde : Git en local + Github https://github.com/JackReality/webPotfolioArb
 - [ ] **Stripe live** — Remplacer les clés test par les clés live dans `.env` avant la mise en prod
 - [ ] **Page `/stripe-error`** — Vérifier qu'elle s'affiche correctement avec un lien retour
 - [ ] **Page `/formation`** — Vérifier qu'elle existe (URL de retour si le user annule le paiement)
+
+---
+
+## Fait le 2026-06-27
+
+### DÉBOGAGE NUXT — Bugs visuels et fonctionnels ✅
+
+- [x] Fond noir forcé dans `main.css` (Nuxt UI imposait un fond bleu-gris)
+- [x] CSS variables `--ui-bg*` dans `main.css` pour les fonds de cards (cards invisibles avant)
+- [x] Boutons : style métal argenté avec effets hover/active dans `main.css`
+- [x] Page contact : `max-w-lg` + `w-full` sur tous les champs (trop petits avant)
+- [x] Multilingue : `$i18n.setLocale()` dans `auth.global.ts` (la langue ne changeait pas)
+- [x] Picto user disparu → `useState('app-session')` dans `AppNavMenu` (au lieu de `useFetch`)
+- [x] `text-destructive` → `text-red-500` partout (classe shadcn invalide dans Nuxt UI v4)
+- [x] Validation format email côté serveur dans `request-email-change` (`ERR_EMAIL_INVALID`)
+- [x] `CodeService` : max tentatives 5 → 3 · retour auto à idle après épuisement
+- [x] `ERR_EMAIL_INVALID` ajouté dans les 3 locales FR/EN/ES
 
 ---
 

@@ -459,6 +459,7 @@
   "ERR_SYSTEM": "An unexpected error occurred. Please try again.",
   "ERR_FIELDS_REQUIRED": "All fields are required.",
   "ERR_INVALID_EMAIL": "Invalid email address.",
+  "ERR_EMAIL_INVALID": "Invalid email address.",
   "ERR_EMAIL_TAKEN": "This email address is already in use.",
   "ERR_INVALID_CREDENTIALS": "Invalid email or password.",
   "ERR_INVALID_LANG": "Unsupported language.",

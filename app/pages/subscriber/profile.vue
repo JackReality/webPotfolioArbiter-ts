@@ -71,7 +71,12 @@ async function handleConfirmEmailChange() {
     })
     refreshAndRedirect()
   } catch (e: any) {
-    emailError.value = t(e.data?.error ?? 'ERR_SYSTEM')
+    const code = e.data?.error ?? 'ERR_SYSTEM'
+    emailError.value = t(code)
+    if (code === 'ERR_CODE_MAX_ATTEMPTS' || code === 'ERR_CODE_NOT_FOUND') {
+      emailStep.value = 'idle'
+      otp.value = ''
+    }
   }
 }
 
@@ -97,7 +102,7 @@ function cancelEmailChange() {
           <UFormField :label="t('profile.name')">
             <UInput v-model="displayName" />
           </UFormField>
-          <p v-if="nameError" class="text-sm text-destructive">{{ nameError }}</p>
+          <p v-if="nameError" class="text-sm text-red-500">{{ nameError }}</p>
           <UButton @click="handleUpdateName">{{ t('common.save') }}</UButton>
         </div>
       </UCard>
@@ -128,7 +133,7 @@ function cancelEmailChange() {
             <UFormField :label="t('profile.newEmail')">
               <UInput v-model="newEmail" type="email" />
             </UFormField>
-            <p v-if="emailError" class="text-sm text-destructive">{{ emailError }}</p>
+            <p v-if="emailError" class="text-sm text-red-500">{{ emailError }}</p>
             <UButton @click="handleRequestEmailChange">{{ t('profile.sendCode') }}</UButton>
           </template>
 
@@ -137,7 +142,7 @@ function cancelEmailChange() {
             <UFormField :label="t('profile.verificationCode')">
               <UInput v-model="otp" :maxlength="6" />
             </UFormField>
-            <p v-if="emailError" class="text-sm text-destructive">{{ emailError }}</p>
+            <p v-if="emailError" class="text-sm text-red-500">{{ emailError }}</p>
             <div class="flex gap-2">
               <UButton @click="handleConfirmEmailChange">{{ t('profile.confirm') }}</UButton>
               <UButton variant="outline" @click="cancelEmailChange">{{ t('common.cancel') }}</UButton>
